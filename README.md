@@ -1,0 +1,2 @@
+# osuc_digital_twin
+OSUC DIGITAL TWIN PROJECT : MASTER 2 2025/2026
