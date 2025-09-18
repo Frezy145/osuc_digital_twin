@@ -20,13 +20,13 @@ jobs:
 
       - name: Copy files to Raspberry Pi
         run: |
-          rsync -avz --delete ./ pi@YOUR_RASPBERRY_PI_IP:/home/pi/your_project_directory/
+          rsync -avz --delete ./ pi@{{secrets.RASPBERRY_PI_IP}}:{{secrets.PROJECT_DIR}} --exclude '.git/' --exclude 'node_modules/' --exclude '__pycache__/' --exclude '*.pyc'
 
       - name: Run deployment script on Raspberry Pi
         run: |
-          ssh pi@YOUR_RASPBERRY_PI_IP 'bash /home/pi/your_project_directory/deploy.sh' 
+          ssh pi@{{secrets.RASPBERRY_PI_IP}} 'bash {{secrets.PROJECT_DIR}}/deploy.sh' 
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          DEPLOY_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           RASPBERRY_PI_IP: ${{ secrets.RASPBERRY_PI_IP }}
           RASPBERRY_PI_USER: ${{ secrets.RASPBERRY_PI_USER }}
           RASPBERRY_PI_PASSWORD: ${{ secrets.RASPBERRY_PI_PASSWORD }}
