@@ -1,0 +1,34 @@
+# Here is the GitHub Actions workflow file for deploying the project on Raspberry Pi
+
+name: Deploy to Raspberry Pi
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Copy files to Raspberry Pi
+        run: |
+          rsync -avz --delete ./ pi@{{secrets.RASPBERRY_PI_IP}}:{{secrets.PROJECT_DIR}} --exclude '.git/' --exclude 'node_modules/' --exclude '__pycache__/' --exclude '*.pyc'
+
+      - name: Run deployment script on Raspberry Pi
+        run: |
+          ssh pi@{{secrets.RASPBERRY_PI_IP}} 'bash {{secrets.PROJECT_DIR}}/deploy.sh' 
+        env:
+          DEPLOY_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          RASPBERRY_PI_IP: ${{ secrets.RASPBERRY_PI_IP }}
+          RASPBERRY_PI_USER: ${{ secrets.RASPBERRY_PI_USER }}
+          RASPBERRY_PI_PASSWORD: ${{ secrets.RASPBERRY_PI_PASSWORD }}
+          PROJECT_DIR: ${{ secrets.PROJECT_DIR }}
+          DEPLOY_SCRIPT: ${{ secrets.DEPLOY_SCRIPT }}
