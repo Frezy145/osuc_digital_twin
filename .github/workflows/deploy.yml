@@ -20,6 +20,15 @@ jobs:
             echo "DEPLOY_KEY is not set. Please add it to the repository secrets."
             exit 1
           fi  
+      
+      # test SSH connection
+      - name: Test SSH Connection
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.RASPBERRY_PI_USER }}@{{secrets.RASPBERRY_PI_IP}} 'echo "SSH connection successful"'
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+          RASPBERRY_PI_IP: ${{ secrets.RASPBERRY_PI_IP }}
+          RASPBERRY_PI_USER: ${{ secrets.RASPBERRY_PI_USER }}
 
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
@@ -37,6 +46,5 @@ jobs:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
           RASPBERRY_PI_IP: ${{ secrets.RASPBERRY_PI_IP }}
           RASPBERRY_PI_USER: ${{ secrets.RASPBERRY_PI_USER }}
-          RASPBERRY_PI_PASSWORD: ${{ secrets.RASPBERRY_PI_PASSWORD }}
           PROJECT_DIR: ${{ secrets.PROJECT_DIR }}
           DEPLOY_SCRIPT: ${{ secrets.DEPLOY_SCRIPT }}
