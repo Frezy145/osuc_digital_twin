@@ -15,13 +15,15 @@ import pandas as pd  # pour filtrer les colonnes
    
 
 API_KEY = "aea516e0e7de4ce6a516e0e7de3ce666"
-STATION_ID = "IOLIVE50"
+STATION_ID = "IORLAN50"
 
 url = (
     f"https://api.weather.com/v2/pws/observations/current"
     f"?stationId={STATION_ID}&format=json&units=m&apiKey={API_KEY}")
 
-filename = "données_station_IOLIVE50.csv"
+filename = "données_station_IORLAN50.csv"
+
+
 
 # Colonnes à conserver
 colonnes_a_garder = [
