@@ -13,10 +13,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      # Verify SSH key is set up in repository secrets
+      - name: Verify SSH Key
+        run: |
+          if [ -z "${{ secrets.DEPLOY_KEY }}" ]; then
+            echo "DEPLOY_KEY is not set. Please add it to the repository secrets."
+            exit 1
+          fi  
+
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
 
       - name: Copy files to Raspberry Pi
         run: |
@@ -26,7 +34,7 @@ jobs:
         run: |
           ssh pi@{{secrets.RASPBERRY_PI_IP}} 'bash {{secrets.PROJECT_DIR}}/deploy.sh' 
         env:
-          DEPLOY_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
           RASPBERRY_PI_IP: ${{ secrets.RASPBERRY_PI_IP }}
           RASPBERRY_PI_USER: ${{ secrets.RASPBERRY_PI_USER }}
           RASPBERRY_PI_PASSWORD: ${{ secrets.RASPBERRY_PI_PASSWORD }}
