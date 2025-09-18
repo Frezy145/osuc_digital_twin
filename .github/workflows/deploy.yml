@@ -24,7 +24,7 @@ jobs:
       # test SSH connection
       - name: Test SSH Connection
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.RASPBERRY_PI_USER }}@{{secrets.RASPBERRY_PI_IP}} 'echo "SSH connection successful"'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.RASPBERRY_PI_USER }}@${{secrets.RASPBERRY_PI_IP}} 'echo "SSH connection successful"'
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
           RASPBERRY_PI_IP: ${{ secrets.RASPBERRY_PI_IP }}
@@ -37,11 +37,11 @@ jobs:
 
       - name: Copy files to Raspberry Pi
         run: |
-          rsync -avz --delete ./ pi@{{secrets.RASPBERRY_PI_IP}}:{{secrets.PROJECT_DIR}} --exclude '.git/' --exclude 'node_modules/' --exclude '__pycache__/' --exclude '*.pyc'
+          rsync -avz --delete ./ ${{ secrets.RASPBERRY_PI_USER }}@${{ secrets.RASPBERRY_PI_IP }}:${{ secrets.PROJECT_DIR }} --exclude '.git/' --exclude 'node_modules/' --exclude '__pycache__/' --exclude '*.pyc'
 
       - name: Run deployment script on Raspberry Pi
         run: |
-          ssh pi@{{secrets.RASPBERRY_PI_IP}} 'bash {{secrets.PROJECT_DIR}}/deploy.sh' 
+          ssh ${{ secrets.RASPBERRY_PI_USER }}@${{ secrets.RASPBERRY_PI_IP }} 'bash ${{ secrets.PROJECT_DIR }}/deploy.sh'
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
           RASPBERRY_PI_IP: ${{ secrets.RASPBERRY_PI_IP }}
