@@ -28,6 +28,7 @@ filename = "données_station_IORLAN50.csv"
 # Colonnes à conserver
 colonnes_a_garder = [
     "solarRadiation",
+    "epoch",
     "winddir",
     "humidity",
     "metric_temp",
@@ -84,6 +85,8 @@ def get_meteo_locale(url:str):
             print("⚠️ Aucune observation disponible.")
     else:
         print(f"❌ Erreur API : {resp.status_code} - {resp.text}")
+        
+get_meteo_locale(url)
 
 
     
