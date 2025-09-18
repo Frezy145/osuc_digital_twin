@@ -10,41 +10,20 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      # Verify SSH key is set up in repository secrets
-      - name: Verify SSH Key
-        run: |
-          if [ -z "${{ secrets.DEPLOY_KEY }}" ]; then
-            echo "DEPLOY_KEY is not set. Please add it to the repository secrets."
-            exit 1
-          fi  
-      
-      # test SSH connection
-      - name: Test SSH Connection
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.RASPBERRY_PI_USER }}@${{secrets.RASPBERRY_PI_IP}} 'echo "SSH connection successful"'
-        env:
-          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-          RASPBERRY_PI_IP: ${{ secrets.RASPBERRY_PI_IP }}
-          RASPBERRY_PI_USER: ${{ secrets.RASPBERRY_PI_USER }}
-
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.3
+      - name: Tailscale
+        uses: tailscale/github-action@v3
         with:
-          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+          version: 1.66.0
 
-      - name: Copy files to Raspberry Pi
-        run: |
-          rsync -avz --delete ./ ${{ secrets.RASPBERRY_PI_USER }}@${{ secrets.RASPBERRY_PI_IP }}:${{ secrets.PROJECT_DIR }} --exclude '.git/' --exclude 'node_modules/' --exclude '__pycache__/' --exclude '*.pyc'
-
-      - name: Run deployment script on Raspberry Pi
-        run: |
-          ssh ${{ secrets.RASPBERRY_PI_USER }}@${{ secrets.RASPBERRY_PI_IP }} 'bash ${{ secrets.PROJECT_DIR }}/deploy.sh'
-        env:
-          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-          RASPBERRY_PI_IP: ${{ secrets.RASPBERRY_PI_IP }}
-          RASPBERRY_PI_USER: ${{ secrets.RASPBERRY_PI_USER }}
-          PROJECT_DIR: ${{ secrets.PROJECT_DIR }}
-          DEPLOY_SCRIPT: ${{ secrets.DEPLOY_SCRIPT }}
+      # test connection
+      - name: Ping Raspberry Pi
+        run: tailscale ping ${{ secrets.RPI_TAILSCALE_IP }}
+        continue-on-error: true 
+      - name: Deploy to Raspberry Pi
+        run: |  
+          scp -o "StrictHostKeyChecking=no" -r ./src/* pi@${{ secrets.RPI_TAILSCALE_IP }}:/home/pi/osuc_digital_twin/src/
+          ssh -o "StrictHostKeyChecking=no" pi@${{ secrets.RPI_TAILSCALE_IP }} 'bash -s' < ./deploy_script.sh 
+          
