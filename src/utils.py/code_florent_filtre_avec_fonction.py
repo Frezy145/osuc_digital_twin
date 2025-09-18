@@ -12,6 +12,7 @@ import time
 from datetime import datetime
 import pandas as pd  # pour filtrer les colonnes
 
+__all__ = ["get_meteo_locale"]
    
 
 API_KEY = "aea516e0e7de4ce6a516e0e7de3ce666"
