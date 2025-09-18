@@ -1,0 +1,31 @@
+# Development dependencies for OSUC Digital Twin Project
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
+pytest-xdist>=3.0.0
+
+# Code formatting and linting
+black>=22.0.0
+isort>=5.10.0
+flake8>=5.0.0
+mypy>=0.991
+
+# Pre-commit hooks
+pre-commit>=2.20.0
+
+# Documentation
+sphinx>=5.0.0
+sphinx-rtd-theme>=1.0.0
+
+# Jupyter (for data analysis and experimentation)
+jupyter>=1.0.0
+jupyterlab>=3.5.0
+
+# Development utilities
+python-dotenv>=0.19.0
+watchdog>=2.1.0
+
+# Include production requirements
+-r requirements.txt
