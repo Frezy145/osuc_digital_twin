@@ -23,14 +23,14 @@ def lire_sonde(client, slave_id, label=""):
     else:
         humidity = response.registers[0] / 10.0
         temperature = response.registers[1] / 10.0
-        conductivity = response.registers[2]
+        conductivity = response.registers[2] /10.0
         ph = response.registers[3] / 10.0
 
         return humidity,temperature,conductivity,ph
         
         
         
-def SendData(T1, H1, C1, pH1, T2, H2, C2, pH2, T3, H3, C3, pH3):
+def SendData(T1, H1, C1, pH1, T2, H2, C2, pH2, T3, H3, C3, pH3, T4, H4, C4, pH4):
     data = {
         "T_sonde1": T1,
         "H_sonde1": H1,
@@ -43,7 +43,11 @@ def SendData(T1, H1, C1, pH1, T2, H2, C2, pH2, T3, H3, C3, pH3):
         "T_sonde3": T3,
         "H_sonde3": H3,
         "c_sonde3": C3,
-        "pH_sonde3": pH3
+        "pH_sonde3": pH3,
+        "T_sonde4": T4,
+        "H_sonde4": H4,
+        "c_sonde4": C4,
+        "pH_sonde4": pH4
     }
     requests.post(url, headers=headers, data=json.dumps(data))
         
@@ -54,8 +58,9 @@ while True:
     H1,T1,C1,pH1=lire_sonde(client, 0x01, "1")
     H2,T2,C2,pH2=lire_sonde(client, 0x02, "2")
     H3,T3,C3,pH3=lire_sonde(client, 0x03, "3")
+    H4,T4,C4,pH4=lire_sonde(client, 0x04, "4")
     
-    SendData(T1, H1, C1, pH1, T2, H2, C2, pH2, T3, H3, C3, pH3)
+    SendData(T1, H1, C1, pH1, T2, H2, C2, pH2, T3, H3, C3, pH3, T4, H4, C4, pH4)
     
     # print("sonde 1 :")
     # print(H1)
@@ -74,6 +79,12 @@ while True:
     # print(T3)
     # print(C3)
     # print(pH3)
+    # print("********************")
+    # print("sonde 4 :")
+    # print(H4)
+    # print(T4)
+    # print(C4)
+    # print(pH4)
     # print("********************")
     
     
