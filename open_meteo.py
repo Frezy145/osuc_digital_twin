@@ -37,8 +37,8 @@ url = "https://api.open-meteo.com/v1/forecast"
 params = {
     "latitude": LAT,
     "longitude": LON,
-    "hourly": ["temperature_2m", "relative_humidity_2m", "pressure_msl",  "wind_speed_10m", "precipitation",
-               "soil_temperature_0cm", "soil_temperature_54cm"],
+    "hourly": ["temperature_2m", "relative_humidity_2m", "pressure_msl",  "wind_speed_10m",
+               "wind_direction_10m", "precipitation", "soil_temperature_0cm", "soil_temperature_54cm"],
     "forecast_days": DAYS_FORECAST,
 }
 
@@ -61,9 +61,10 @@ df_om = pd.DataFrame({
     "humidity": hourly.Variables(1).ValuesAsNumpy(),
     "pressure": hourly.Variables(2).ValuesAsNumpy(),
     "wind_speed": hourly.Variables(3).ValuesAsNumpy(),
-    "precipitation": hourly.Variables(4).ValuesAsNumpy(),
-    "soil_temperature_0cm": hourly.Variables(5).ValuesAsNumpy(),
-    "soil_temperature_54cm": hourly.Variables(6).ValuesAsNumpy()
+    "wind_direction": hourly.Variables(4).ValuesAsNumpy(),
+    "precipitation": hourly.Variables(5).ValuesAsNumpy(),
+    "soil_temperature_0cm": hourly.Variables(6).ValuesAsNumpy(),
+    "soil_temperature_54cm": hourly.Variables(7).ValuesAsNumpy()
 })
 
 # ----------------
@@ -75,6 +76,7 @@ variables = {
     "humidity": {"label": "Humidité relative (%)", "color": "blue", "unit": "%"},
     "pressure": {"label": "Pression atmosphérique (hPa)", "color": "green", "unit": "hPa"},
     "wind_speed": {"label": "Vitesse du vent (km/h)", "color": "cyan", "unit": "km/h"},
+    "wind_direction": {"label": "Direction du vent (°)", "color": "magenta", "unit": "°"},
     "precipitation": {"label": "Précipitations (mm)", "color": "purple", "unit": "mm"},
     "soil_temperature_0cm": {"label": "Température du sol à 0 cm (°C)", "color": "orange", "unit": "°C"},
     "soil_temperature_54cm": {"label": "Température du sol à 54 cm (°C)", "color": "brown", "unit": "°C"},

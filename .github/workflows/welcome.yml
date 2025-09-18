@@ -1,0 +1,93 @@
+name: Welcome New Contributors
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Welcome new contributor on issue
+      if: github.event_name == 'issues'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const issue = context.payload.issue;
+          const isFirstIssue = await github.rest.search.issuesAndPullRequests({
+            q: `author:${issue.user.login} repo:${context.repo.owner}/${context.repo.repo} type:issue`,
+            sort: 'created',
+            order: 'asc'
+          });
+          
+          if (isFirstIssue.data.total_count === 1) {
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## Welcome to OSUC Digital Twin Project! 🎉
+
+Thank you for creating your first issue, @${issue.user.login}! 
+
+We're excited to have you as part of our collaborative community. Here are some helpful resources:
+
+- 📖 **[Contributing Guidelines](CONTRIBUTING.md)** - Learn how to contribute effectively
+- 💬 **[Discussions](https://github.com/${context.repo.owner}/${context.repo.repo}/discussions)** - Ask questions and share ideas
+- 🏷️ **[Good First Issues](https://github.com/${context.repo.owner}/${context.repo.repo}/labels/good%20first%20issue)** - Perfect for getting started
+- 📋 **[Code of Conduct](CODE_OF_CONDUCT.md)** - Our community guidelines
+
+A maintainer will review your issue soon. Feel free to join our discussions if you have any questions!
+
+Happy contributing! 🚀`
+            });
+          }
+
+    - name: Welcome new contributor on PR
+      if: github.event_name == 'pull_request_target'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const pr = context.payload.pull_request;
+          const isPRFromFork = pr.head.repo.fork;
+          
+          const isFirstPR = await github.rest.search.issuesAndPullRequests({
+            q: `author:${pr.user.login} repo:${context.repo.owner}/${context.repo.repo} type:pr`,
+            sort: 'created',
+            order: 'asc'
+          });
+          
+          if (isFirstPR.data.total_count === 1) {
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## Welcome to OSUC Digital Twin Project! 🎉
+
+Thank you for your first pull request, @${pr.user.login}! 
+
+We're thrilled to have you contribute to our collaborative project. Here's what happens next:
+
+### Review Process
+- A maintainer will review your PR soon
+- You might receive feedback for improvements
+- Don't worry - this is a learning process!
+
+### While you wait
+- Check out our **[Contributing Guidelines](CONTRIBUTING.md)** if you haven't already
+- Join the **[Discussions](https://github.com/${context.repo.owner}/${context.repo.repo}/discussions)** to connect with other contributors
+- Look for more **[Good First Issues](https://github.com/${context.repo.owner}/${context.repo.repo}/labels/good%20first%20issue)** to work on
+
+### Tips for success
+- Ensure your PR follows our branching convention
+- Make sure all checks pass
+- Be responsive to feedback
+- Ask questions if anything is unclear
+
+Thank you for being part of our collaborative learning environment! 🚀
+
+${isPRFromFork ? '*Note: Since this PR is from a fork, some automated checks may require maintainer approval.*' : ''}`
+            });
+          }

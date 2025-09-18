@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 General Discussion
+    url: https://github.com/Frezy145/osuc_digital_twin/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 📧 Contact Maintainers
+    url: https://github.com/Frezy145/osuc_digital_twin/discussions/categories/general
+    about: For sensitive issues or direct communication with maintainers
