@@ -6,7 +6,7 @@ import csv
 from datetime import datetime
 
 
-url = "https://eu.thingsboard.cloud/api/v1/TYO7UGAFQAKZrtPb773x/telemetry"
+url = "https://thingsboard.cloud/dashboard/8feb3a50-9306-11f0-a1aa-d709ca5e32a7?publicId=b0676a50-9474-11f0-82a5-3b714d9b93ee/jaIwPnJ4jzsjS4v6uXvz/telemetry"
 headers = {"Content-Type": "application/json"}
 
 # Configuration du client Modbus pour Raspberry Pi
