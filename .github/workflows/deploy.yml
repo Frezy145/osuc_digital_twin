@@ -22,8 +22,16 @@ jobs:
       - name: Ping Raspberry Pi
         run: |
           tailscale status
-          tailscale ping ${{ secrets.RPI_TAILSCALE_IP }}
         continue-on-error: true 
+      
+      # creat file in /home/mmoreira/app/test.txt to test connection
+      - name: Test Connection to Raspberry Pi
+        run: |
+          ssh -o "StrictHostKeyChecking=no" ${{ secrets.RASPBERRY_PI_USER }}@${{ secrets.RPI_TAILSCALE_IP }} "'echo "
+            Connection Successful" > /home/${{ secrets.RASPBERRY_PI_USER }}/app/test.txt'
+          "
+        continue-on-error: false
+      
       # - name: Deploy to Raspberry Pi
       #   run: |  
       #     scp -o "StrictHostKeyChecking=no" -r ./src/* pi@${{ secrets.RPI_TAILSCALE_IP }}:/home/pi/osuc_digital_twin/src/
