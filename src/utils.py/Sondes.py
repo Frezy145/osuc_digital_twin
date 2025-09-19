@@ -6,7 +6,7 @@ import csv
 from datetime import datetime
 
 
-url = "https://thingsboard.cloud/dashboard/8feb3a50-9306-11f0-a1aa-d709ca5e32a7?publicId=b0676a50-9474-11f0-82a5-3b714d9b93ee/jaIwPnJ4jzsjS4v6uXvz/telemetry"
+url = "http://thingsboard.cloud/api/v1/{jaIwPnJ4jzsjS4v6uXvz}/telemetry"
 headers = {"Content-Type": "application/json"}
 
 # Configuration du client Modbus pour Raspberry Pi
@@ -23,7 +23,7 @@ def lire_sonde(client, slave_id, label=""):
     else:
         humidity = response.registers[0] / 10.0
         temperature = response.registers[1] / 10.0
-        conductivity = response.registers[2] /10.0
+        conductivity = response.registers[2] / 10.0
         ph = response.registers[3] / 10.0
 
         return humidity,temperature,conductivity,ph
