@@ -28,7 +28,7 @@ jobs:
       - name: Test Connection to Raspberry Pi
         run: |
           ssh -o "StrictHostKeyChecking=no" ${{ secrets.RASPBERRY_PI_USER }}@${{ secrets.RASPBERRY_PI_IP }} "
-            echo "Connection Successful !" > /home/${{ secrets.RASPBERRY_PI_USER }}/app/test.txt'
+            echo 'Connection Successful !' > /home/${{ secrets.RASPBERRY_PI_USER }}/app/test.txt
           "
         continue-on-error: false
       
