@@ -12,7 +12,6 @@ import time
 from datetime import datetime
 import pandas as pd  # pour filtrer les colonnes
 
-__all__ = ["get_meteo_locale"]
    
 
 API_KEY = "aea516e0e7de4ce6a516e0e7de3ce666"
@@ -28,8 +27,6 @@ filename = "données_station_IORLAN50.csv"
 
 # Colonnes à conserver
 colonnes_a_garder = [
-    "stationID",
-    "obsTimeLocal",
     "solarRadiation",
     "epoch",
     "winddir",
@@ -40,7 +37,7 @@ colonnes_a_garder = [
     "metric_pressure",
     "metric_precipRate",
     "metric_precipTotal",
-    "collected_at"  # j’ai ajouté ta colonne de timestamp locale
+    
     ]
  # Vérifie si le fichier existe déjà (sinon, crée avec en-têtes)
 def init_csv(headers):
@@ -88,6 +85,8 @@ def get_meteo_locale(url:str):
             print("⚠️ Aucune observation disponible.")
     else:
         print(f"❌ Erreur API : {resp.status_code} - {resp.text}")
+        
+get_meteo_locale(url)
 
 
     
