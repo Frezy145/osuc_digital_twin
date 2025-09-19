@@ -20,10 +20,12 @@ jobs:
 
       # test connection
       - name: Ping Raspberry Pi
-        run: tailscale ping ${{ secrets.RPI_TAILSCALE_IP }}
+        run: |
+          tailscale status
+          tailscale ping ${{ secrets.RPI_TAILSCALE_IP }}
         continue-on-error: true 
-      - name: Deploy to Raspberry Pi
-        run: |  
-          scp -o "StrictHostKeyChecking=no" -r ./src/* pi@${{ secrets.RPI_TAILSCALE_IP }}:/home/pi/osuc_digital_twin/src/
-          ssh -o "StrictHostKeyChecking=no" pi@${{ secrets.RPI_TAILSCALE_IP }} 'bash -s' < ./deploy_script.sh 
+      # - name: Deploy to Raspberry Pi
+      #   run: |  
+      #     scp -o "StrictHostKeyChecking=no" -r ./src/* pi@${{ secrets.RPI_TAILSCALE_IP }}:/home/pi/osuc_digital_twin/src/
+      #     ssh -o "StrictHostKeyChecking=no" pi@${{ secrets.RPI_TAILSCALE_IP }} 'bash -s' < ./deploy_script.sh 
           
