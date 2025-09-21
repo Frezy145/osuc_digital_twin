@@ -1,0 +1,4 @@
+solarRadiation,epoch,winddir,humidity,metric_temp,metric_windSpeed,metric_windGust,metric_pressure,metric_precipRate,metric_precipTotal
+195.8,1758465531,121,59,20,1,1,1005.42,0.0,14.99
+158.0,1758465590,128,63,19,0,1,1005.42,0.0,14.99
+81.6,1758466311,78,66,18,0,0,1005.08,0.0,14.99

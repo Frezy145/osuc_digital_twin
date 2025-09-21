@@ -16,18 +16,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11.2'
-
-      # - name: Install Dependencies
-      #   run: |
-      #     python -m pip install --upgrade pip
-      #     pip install -r requirements.txt
-
-      # - name: Deploy to Raspberry Pi
-      #   run: |  
-      #     scp -o "StrictHostKeyChecking=no" -r ./src/* ${{ secrets.RASPBERRY_PI_USER }}@${{ secrets.RASPBERRY_PI_IP }}:/home/${{ secrets.RASPBERRY_PI_USER }}/osuc_digital_twin/src/
-      #     ssh -o "StrictHostKeyChecking=no" ${{ secrets.RASPBERRY_PI_USER }}@${{ secrets.RASPBERRY_PI_IP }} 'bash -s' < ./scripts/deploy.sh 
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
       
+      - name: Run deploy script
+        run: |
+          chmod +x scripts/deploy.sh
+          ./scripts/deploy.sh

@@ -1,107 +1,140 @@
-# https://open-meteo.com/en/docs
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Sep 18 21:07:29 2025
 
-# import requests
-# import json
+@author: sophi
+"""
+
 import pandas as pd
 import openmeteo_requests
 import requests_cache
 from retry_requests import retry
-# import matplotlib.pyplot as plt
 
-# url = "https://geocoding-api.open-meteo.com/v1/search"
-# params = {"name": "Saint-Cyr-en-Val", "count": 1}
-# response = requests.get(url, params=params)
+import csv
+import requests
+import time
+from datetime import datetime
+import os
+import sys
+from pathlib import Path
 
-# if response.status_code == 200:
-#     data = response.json()
-#     latitude = data["results"][0]["latitude"]
-#     longitude = data["results"][0]["longitude"]
-#     print(f"Latitude: {latitude}, Longitude: {longitude}")
-# else:
-#     print(f"Erreur {response.status_code}: {response.text}")
-#     exit()
+from src.utils.log import log_error, log_warning
 
-# ----------------
-# Requête à l'API Open-Meteo avec gestion du cache et des retries
-# ----------------
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.append(str(BASE_DIR))
 
-# número de días de previsión
-DAYS_FORECAST = 10
-LAT, LON = 47.833499, 1.943945
+if not os.path.exists(f"{BASE_DIR}/db"):
+    os.makedirs(f"{BASE_DIR}/db")
 
-cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
-retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
-openmeteo = openmeteo_requests.Client(session=retry_session)
+output_csv = f"{BASE_DIR}/db/OpenMeteo_forecast.csv"
 
-url = "https://api.open-meteo.com/v1/forecast"
-params = {
-    "latitude": LAT,
-    "longitude": LON,
-    "hourly": ["temperature_2m", "relative_humidity_2m", "pressure_msl",  "wind_speed_10m",
-               "wind_direction_10m", "precipitation", "soil_temperature_6cm",
-               "soil_temperature_18cm", "soil_temperature_54cm"],
-    "forecast_days": DAYS_FORECAST,
-}
+def get_open_meteo():
+    """
+    Récupère les données météo d'Open-Meteo et les sauvegarde dans un CSV.
 
-responses = openmeteo.weather_api(url, params=params)
-response = responses[0]
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+        days_forecast (int): nombre de jours de prévision
+        output_csv (str): nom du fichier CSV de sortie
+    """
+    
+    # Session avec cache et retries
+    cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
+    retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
+    openmeteo = openmeteo_requests.Client(session=retry_session)
 
-# Traitement des données horaires
-hourly = response.Hourly()
-dates = pd.date_range(
-    start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
-    end=pd.to_datetime(hourly.TimeEnd(), unit="s", utc=True),
-    freq=pd.Timedelta(seconds=hourly.Interval()),
-    inclusive="left"
-)
+    lat=47.833499
+    lon=1.943945
+    days_forecast=10
 
-# Extraction de toutes les variables
-df_om = pd.DataFrame({
-    "date": dates,
-    "temperature_om": hourly.Variables(0).ValuesAsNumpy(),
-    "humidity_om": hourly.Variables(1).ValuesAsNumpy(),
-    "pressure_om": hourly.Variables(2).ValuesAsNumpy(),
-    "wind_speed_om": hourly.Variables(3).ValuesAsNumpy(),
-    "wind_direction_om": hourly.Variables(4).ValuesAsNumpy(),
-    "precipitation_om": hourly.Variables(5).ValuesAsNumpy(),
-    "soil_temperature_6cm_om": hourly.Variables(6).ValuesAsNumpy(),
-    "soil_temperature_18cm_om": hourly.Variables(7).ValuesAsNumpy(),
-    "soil_temperature_54cm_om": hourly.Variables(8).ValuesAsNumpy()
-})
+    url = "https://api.open-meteo.com/v1/forecast"
+    params = {
+        "latitude": lat,
+        "longitude": lon,
+        "hourly": [
+            "temperature_2m", "relative_humidity_2m", "pressure_msl", "wind_speed_10m",
+            "wind_direction_10m", "precipitation", "soil_temperature_6cm",
+            "soil_temperature_18cm", "soil_temperature_54cm"
+        ],
+        "forecast_days": days_forecast,
+    }
 
-# ----------------
-# Tracé de chaque paramètre
-# ----------------
+    responses = openmeteo.weather_api(url, params=params)
+    response = responses[0]
 
-variables = {
-    "temperature_om": {"label": "Température (°C)", "color": "red", "unit": "°C"},
-    "humidity_om": {"label": "Humidité relative (%)", "color": "blue", "unit": "%"},
-    "pressure_om": {"label": "Pression atmosphérique (hPa)", "color": "green", "unit": "hPa"},
-    "wind_speed_om": {"label": "Vitesse du vent (km/h)", "color": "cyan", "unit": "km/h"},
-    "wind_direction_om": {"label": "Direction du vent (°)", "color": "magenta", "unit": "°"},
-    "precipitation_om": {"label": "Précipitations (mm)", "color": "purple", "unit": "mm"},
-    "soil_temperature_6cm_om": {"label": "Température du sol à 6 cm (°C)", "color": "orange", "unit": "°C"},
-    "soil_temperature_18cm_om": {"label": "Température du sol à 18 cm (°C)", "color": "goldenrod", "unit": "°C"},
-    "soil_temperature_54cm_om": {"label": "Température du sol à 54 cm (°C)", "color": "brown", "unit": "°C"},
-}
+    # Données horaires
+    hourly = response.Hourly()
+    dates = pd.date_range(
+        start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
+        end=pd.to_datetime(hourly.TimeEnd(), unit="s", utc=True),
+        freq=pd.Timedelta(seconds=hourly.Interval()),
+        inclusive="left"
+    )
 
-# for var, info in variables.items():
-#     plt.figure(figsize=(8, 4))
-#     # plt.scatter(hourly_dataframe["date"], hourly_dataframe[var], label=info["label"], color=info["color"])
-#     plt.plot(df_om["date"], df_om[var], label=info["label"], color=info["color"])
-#     plt.xlabel("Date et heure")
-#     plt.ylabel(info["label"])
-#     plt.title(f"{info['label']} à Saint-Cyr-en-Val (Lat: {LAT}, Lon: {LON})")
-#     plt.grid(True)
-#     plt.legend()
-#     plt.xticks(rotation=45)
-#     plt.tight_layout()
-#     plt.show()
+    df_om = pd.DataFrame({
+        "date": dates,
+        "temperature_om": hourly.Variables(0).ValuesAsNumpy(),
+        "humidity_om": hourly.Variables(1).ValuesAsNumpy(),
+        "pressure_om": hourly.Variables(2).ValuesAsNumpy(),
+        "wind_speed_om": hourly.Variables(3).ValuesAsNumpy(),
+        "wind_direction_om": hourly.Variables(4).ValuesAsNumpy(),
+        "precipitation_om": hourly.Variables(5).ValuesAsNumpy(),
+        "soil_temperature_6cm_om": hourly.Variables(6).ValuesAsNumpy(),
+        "soil_temperature_18cm_om": hourly.Variables(7).ValuesAsNumpy(),
+        "soil_temperature_54cm_om": hourly.Variables(8).ValuesAsNumpy()
+    })
 
-# ----------------
-# Export vers CSV
-# ----------------
+    # Sauvegarde dans un CSV
+    df_om.to_csv(output_csv, index=False)
 
-df_om.to_csv("OpenMeteo_forecast.csv", index=False)
-print("✅ CSV file exported successfully:")
-print(" - OpenMeteo_forecast.csv")
+
+
+def envoi_donnees_openmeteo_thingsboard():
+    """
+    Envoie les données du CSV Open-Meteo vers ThingsBoard via HTTP.
+
+    Args:
+        csv_file (str): chemin du fichier CSV exporté par get_meteofrance()
+        access_token (str): token d'accès ThingsBoard (Device -> Access Token)
+        tb_url (str): URL du serveur ThingsBoard (par défaut thingsboard.cloud)
+    """
+
+    tb_url="https://thingsboard.cloud/api/v1"
+    access_token="jaIwPnJ4jzsjS4v6uXvz"
+    
+    url = f"{tb_url}/{access_token}/telemetry"
+
+    df = pd.read_csv(output_csv)
+
+    # get data of the current hour
+    current_hour = time.strftime("%Y-%m-%dT%H:00:00Z", time.gmtime())
+    df['date'] = pd.to_datetime(df['date'], utc=True)
+    row = df[df['date'] == current_hour] 
+    
+    try:
+        # Convertir la date ISO en timestamp (ms)
+        ts = int(datetime.fromisoformat(row["date"].replace("Z", "+00:00")).timestamp() * 1000)
+
+        # Préparer les valeurs
+        values = {}
+        for key in [
+            "temperature_om", "humidity_om", "pressure_om", "wind_speed_om", 
+            "wind_direction_om", "precipitation_om",
+            "soil_temperature_6cm_om", "soil_temperature_18cm_om", "soil_temperature_54cm_om"
+        ]:
+            val = row.get(key, "")
+            if val and val.strip():  # non vide
+                values[key] = float(val)
+
+        payload = {"ts": ts, "values": values}
+
+        # Envoi HTTP
+        r = requests.post(url, json=payload)
+        if r.status_code != 200:
+            log_error(f"Erreur envoi Open-Meteo à ThingsBoard: {r.status_code} - {r.text}")
+
+    except Exception as e:
+        log_error(f"Exception lors de l'envoi Open-Meteo à ThingsBoard: {e}")
+

@@ -1,7 +1,0 @@
-meteofrance_api==1.4.0
-openmeteo_requests==1.7.2
-pandas==2.3.2
-pymodbus==3.11.2
-Requests==2.32.5
-requests_cache==1.2.1
-retry_requests==2.0.0
