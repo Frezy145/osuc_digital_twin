@@ -66,7 +66,7 @@ def read_csv_and_compute_mean():
 
 # Fonction pour lire les données d'une sonde donnée
 def read_sensor(client, slave_id, label=""):
-    response = client.read_holding_registers(address=0, count=8, unit=slave_id)
+    response = client.read_holding_registers(address=0, count=8, device_id=slave_id)
     if response.isError():
         log_error(f"Erreur de lecture Modbus (sonde {label}): {response}")
         return None
