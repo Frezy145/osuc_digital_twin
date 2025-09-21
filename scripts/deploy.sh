@@ -2,9 +2,6 @@
 
 # Create a daemon service to run python script on startup
 
-# import pro-setup.sh as needed
-source pro-setup.sh
-
 # Setup systemd service
 SERVICE_FILE="/etc/systemd/system/osuc_digital_twin.service"
 echo "⚙️ Setting up systemd service..."

@@ -1,0 +1,2 @@
+solarRadiation,winddir,humidity,metric_temp,metric_windSpeed,metric_windGust,metric_pressure,metric_precipRate,metric_precipTotal
+0.0,72,96,10,0,0,1011.18,0.0,0.0

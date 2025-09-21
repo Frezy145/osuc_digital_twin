@@ -28,20 +28,22 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## Welcome to OSUC Digital Twin Project! 🎉
+              body: `
+                ## Welcome to OSUC Digital Twin Project! 🎉
 
-Thank you for creating your first issue, @${issue.user.login}! 
+                Thank you for creating your first issue, @${issue.user.login}! 
 
-We're excited to have you as part of our collaborative community. Here are some helpful resources:
+                We're excited to have you as part of our collaborative community. Here are some helpful resources:
 
-- 📖 **[Contributing Guidelines](CONTRIBUTING.md)** - Learn how to contribute effectively
-- 💬 **[Discussions](https://github.com/${context.repo.owner}/${context.repo.repo}/discussions)** - Ask questions and share ideas
-- 🏷️ **[Good First Issues](https://github.com/${context.repo.owner}/${context.repo.repo}/labels/good%20first%20issue)** - Perfect for getting started
-- 📋 **[Code of Conduct](CODE_OF_CONDUCT.md)** - Our community guidelines
+                - 📖 **[Contributing Guidelines](CONTRIBUTING.md)** - Learn how to contribute effectively
+                - 💬 **[Discussions](https://github.com/${context.repo.owner}/${context.repo.repo}/discussions)** - Ask questions and share ideas
+                - 🏷️ **[Good First Issues](https://github.com/${context.repo.owner}/${context.repo.repo}/labels/good%20first%20issue)** - Perfect for getting started
+                - 📋 **[Code of Conduct](CODE_OF_CONDUCT.md)** - Our community guidelines
 
-A maintainer will review your issue soon. Feel free to join our discussions if you have any questions!
+                A maintainer will review your issue soon. Feel free to join our discussions if you have any questions!
 
-Happy contributing! 🚀`
+                Happy contributing! 🚀
+              `
             });
           }
 
@@ -64,30 +66,32 @@ Happy contributing! 🚀`
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## Welcome to OSUC Digital Twin Project! 🎉
+              body: `
+                ## Welcome to OSUC Digital Twin Project! 🎉
 
-Thank you for your first pull request, @${pr.user.login}! 
+                Thank you for your first pull request, @${pr.user.login}! 
 
-We're thrilled to have you contribute to our collaborative project. Here's what happens next:
+                We're thrilled to have you contribute to our collaborative project. Here's what happens next:
 
-### Review Process
-- A maintainer will review your PR soon
-- You might receive feedback for improvements
-- Don't worry - this is a learning process!
+                ### Review Process
+                - A maintainer will review your PR soon
+                - You might receive feedback for improvements
+                - Don't worry - this is a learning process!
 
-### While you wait
-- Check out our **[Contributing Guidelines](CONTRIBUTING.md)** if you haven't already
-- Join the **[Discussions](https://github.com/${context.repo.owner}/${context.repo.repo}/discussions)** to connect with other contributors
-- Look for more **[Good First Issues](https://github.com/${context.repo.owner}/${context.repo.repo}/labels/good%20first%20issue)** to work on
+                ### While you wait
+                - Check out our **[Contributing Guidelines](CONTRIBUTING.md)** if you haven't already
+                - Join the **[Discussions](https://github.com/${context.repo.owner}/${context.repo.repo}/discussions)** to connect with other contributors
+                - Look for more **[Good First Issues](https://github.com/${context.repo.owner}/${context.repo.repo}/labels/good%20first%20issue)** to work on
 
-### Tips for success
-- Ensure your PR follows our branching convention
-- Make sure all checks pass
-- Be responsive to feedback
-- Ask questions if anything is unclear
+                ### Tips for success
+                - Ensure your PR follows our branching convention
+                - Make sure all checks pass
+                - Be responsive to feedback
+                - Ask questions if anything is unclear
 
-Thank you for being part of our collaborative learning environment! 🚀
+                Thank you for being part of our collaborative learning environment! 🚀
 
-${isPRFromFork ? '*Note: Since this PR is from a fork, some automated checks may require maintainer approval.*' : ''}`
+                ${isPRFromFork ? '*Note: Since this PR is from a fork, some automated checks may require maintainer approval.*' : ''}
+              `
             });
           }

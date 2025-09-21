@@ -72,25 +72,26 @@ jobs:
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: `## 🎉 Good First Issue!
+            body: `
+              ## 🎉 Good First Issue!
+                This issue has been marked as a **good first issue**, 
+                making it perfect for newcomers to the project!
+              ### For New Contributors:
+              - This issue is designed to be approachable for first-time contributors
+              - Feel free to ask questions if anything is unclear
+              - Comment below to let us know you're working on it
+              - Check out our [Contributing Guide](CONTRIBUTING.md) for help getting started
 
-This issue has been marked as a **good first issue**, making it perfect for newcomers to the project!
+              ### Getting Started:
+              1. Fork the repository
+              2. Create a branch: \`git checkout -b fix-issue-${context.issue.number}\`
+              3. Make your changes
+              4. Submit a pull request
 
-### For New Contributors:
-- This issue is designed to be approachable for first-time contributors
-- Feel free to ask questions if anything is unclear
-- Comment below to let us know you're working on it
-- Check out our [Contributing Guide](CONTRIBUTING.md) for help getting started
+              Need help? Join our [Discussions](https://github.com/${context.repo.owner}/${context.repo.repo}/discussions) or ask questions right here!
 
-### Getting Started:
-1. Fork the repository
-2. Create a branch: \`git checkout -b fix-issue-${context.issue.number}\`
-3. Make your changes
-4. Submit a pull request
-
-Need help? Join our [Discussions](https://github.com/${context.repo.owner}/${context.repo.repo}/discussions) or ask questions right here!
-
-Thank you for contributing to OSUC Digital Twin Project! 🚀`
+              Thank you for contributing to OSUC Digital Twin Project! 🚀
+            `
           });
 
     - name: Notify about help wanted
@@ -102,14 +103,16 @@ Thank you for contributing to OSUC Digital Twin Project! 🚀`
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: `## 🆘 Help Wanted!
+            body: `
+              ## 🆘 Help Wanted!
 
-This issue is looking for contributors! If you're interested in helping out:
+              This issue is looking for contributors! If you're interested in helping out:
 
-- Comment below to express interest
-- Ask questions if you need clarification
-- Check if someone is already working on it
-- Follow our [contribution workflow](CONTRIBUTING.md#pull-request-process)
+              - Comment below to express interest
+              - Ask questions if you need clarification
+              - Check if someone is already working on it
+              - Follow our [contribution workflow](CONTRIBUTING.md#pull-request-process)
 
-Your contribution would be greatly appreciated! 🙏`
+              Your contribution would be greatly appreciated! 🙏
+            `
           });

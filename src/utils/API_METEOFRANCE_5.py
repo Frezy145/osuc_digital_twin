@@ -8,7 +8,6 @@ Created on Tue Sep 16 16:08:47 2025
 from meteofrance_api import MeteoFranceClient
 import requests
 from datetime import datetime
-import matplotlib.pyplot as plt
 import pandas as pd
 
 # -------------------------------
@@ -78,21 +77,19 @@ print(mean_diffs)
 print("\n🔗 Corrélation entre les deux sources :")
 print(corrs)
 
-# -------------------------------
-# 5) Tracer les comparaisons
-fig, axs = plt.subplots(5, 1, figsize=(14, 24))
+# # -------------------------------
+# # 5) Tracer les comparaisons
+# fig, axs = plt.subplots(5, 1, figsize=(14, 24))
 
 variables = ["temp", "humidity", "pressure", "rain", "wind"]
 titles = ["Température (°C)", "Humidité (%)", "Pression (hPa)", "Précipitations (mm)", "Vent (km/h)"]
 colors_mf = ["red", "blue", "green", "purple", "orange"]
 colors_om = ["orange", "cyan", "lime", "magenta", "brown"]
 
-for i, var in enumerate(variables):
-    axs[i].plot(df_mf.index, df_mf[var], label="Météo-France", color=colors_mf[i])
-    axs[i].plot(df_om.index, df_om[var], label="Open-Meteo", color=colors_om[i], linestyle="--")
-    axs[i].set_title(f"{titles[i]} — Corrélation : {corrs[var]:.2f}")
-    axs[i].legend()
-    axs[i].grid(True)
+# for i, var in enumerate(variables):
+#     axs[i].plot(df_mf.index, df_mf[var], label="Météo-France", color=colors_mf[i])
+#     axs[i].plot(df_om.index, df_om[var], label="Open-Meteo", color=colors_om[i], linestyle="--")
+#     axs[i].set_title(f"{titles[i]} — Corrélation : {corrs[var]:.2f}")
+#     axs[i].legend()
+#     axs[i].grid(True)
 
-plt.tight_layout()
-plt.show()

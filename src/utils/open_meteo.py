@@ -6,7 +6,7 @@ import pandas as pd
 import openmeteo_requests
 import requests_cache
 from retry_requests import retry
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 # url = "https://geocoding-api.open-meteo.com/v1/search"
 # params = {"name": "Saint-Cyr-en-Val", "count": 1}
@@ -85,18 +85,18 @@ variables = {
     "soil_temperature_54cm_om": {"label": "Température du sol à 54 cm (°C)", "color": "brown", "unit": "°C"},
 }
 
-for var, info in variables.items():
-    plt.figure(figsize=(8, 4))
-    # plt.scatter(hourly_dataframe["date"], hourly_dataframe[var], label=info["label"], color=info["color"])
-    plt.plot(df_om["date"], df_om[var], label=info["label"], color=info["color"])
-    plt.xlabel("Date et heure")
-    plt.ylabel(info["label"])
-    plt.title(f"{info['label']} à Saint-Cyr-en-Val (Lat: {LAT}, Lon: {LON})")
-    plt.grid(True)
-    plt.legend()
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.show()
+# for var, info in variables.items():
+#     plt.figure(figsize=(8, 4))
+#     # plt.scatter(hourly_dataframe["date"], hourly_dataframe[var], label=info["label"], color=info["color"])
+#     plt.plot(df_om["date"], df_om[var], label=info["label"], color=info["color"])
+#     plt.xlabel("Date et heure")
+#     plt.ylabel(info["label"])
+#     plt.title(f"{info['label']} à Saint-Cyr-en-Val (Lat: {LAT}, Lon: {LON})")
+#     plt.grid(True)
+#     plt.legend()
+#     plt.xticks(rotation=45)
+#     plt.tight_layout()
+#     plt.show()
 
 # ----------------
 # Export vers CSV
