@@ -50,10 +50,11 @@ colonnes_a_garder = [
     ]
 
 # Vérifie si le fichier existe déjà (sinon, crée avec en-têtes)
-def init_csv():
+def init_csv(reinitialize=False):
     try:
         with open(filename, "r", encoding="utf-8") as f:
-            pass
+            if reinitialize:
+                raise FileNotFoundError
     except FileNotFoundError:
         with open(filename, mode="w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=colonnes_a_garder)
@@ -99,6 +100,7 @@ def read_csv_and_compute_mean():
             log_warning("Le fichier CSV est vide.")
             return None
         mean_values = df.mean(numeric_only=True).to_dict()
+        init_csv(reinitialize=True)
         return mean_values
     except Exception as e:
         log_error(f"Erreur lecture CSV ou calcul moyenne : {e}")

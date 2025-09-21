@@ -10,10 +10,7 @@ import openmeteo_requests
 import requests_cache
 from retry_requests import retry
 
-import csv
 import requests
-import time
-from datetime import datetime
 import os
 import sys
 from pathlib import Path
@@ -109,13 +106,13 @@ def envoi_donnees_openmeteo_thingsboard():
     df = pd.read_csv(output_csv)
 
     # get data of the current hour
-    current_hour = time.strftime("%Y-%m-%dT%H:00:00Z", time.gmtime())
+    current_hour = pd.Timestamp.now(tz="UTC").floor("H")
     df['date'] = pd.to_datetime(df['date'], utc=True)
     row = df[df['date'] == current_hour] 
     
     try:
         # Convertir la date ISO en timestamp (ms)
-        ts = int(datetime.fromisoformat(row["date"].replace("Z", "+00:00")).timestamp() * 1000)
+        ts = int(row["date"].iloc[0].timestamp() * 1000)
 
         # Préparer les valeurs
         values = {}

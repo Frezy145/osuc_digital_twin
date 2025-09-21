@@ -57,6 +57,7 @@ def read_csv_and_compute_mean():
             log_warning("Le fichier CSV est vide.")
             return None
         mean_values = df.mean(numeric_only=True).to_dict()
+        init_csv(reinitialize=True)
         return mean_values
     except FileNotFoundError:
         log_error(f"Le fichier {filename} n'existe pas.")
@@ -65,7 +66,7 @@ def read_csv_and_compute_mean():
 
 # Fonction pour lire les données d'une sonde donnée
 def read_sensor(client, slave_id, label=""):
-    response = client.read_holding_registers(address=0, count=8, slave=slave_id)
+    response = client.read_holding_registers(address=0, count=8, unit=slave_id)
     if response.isError():
         log_error(f"Erreur de lecture Modbus (sonde {label}): {response}")
         return None
