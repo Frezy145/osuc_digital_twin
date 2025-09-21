@@ -18,7 +18,14 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          cd ~/app
+
+          if [ ! -d "venv" ]; then
+            python3 -m venv venv
+          fi
+          source venv/bin/activate
           python -m pip install --upgrade pip
+          cd ~/actions-runner/_work/osuc_digital_twin/osuc_digital_twin
           pip install -r requirements.txt
       
       - name: Run deploy script

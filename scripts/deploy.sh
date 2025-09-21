@@ -1,11 +1,12 @@
 
 #!/bin/bash
 set -e
+cd ~/actions-runner/_work/osuc_digital_twin/osuc_digital_twin
 cp -r src /home/$USER/app
 
 # Répertoire où est ton projet
 APP_DIR="/home/$USER/app/src"
-PYTHON_BIN="/usr/bin/python3"
+PYTHON_BIN="/home/$USER/app/venv/bin/python3"
 
 # Vérifie que main.py existe
 if [ ! -f "$APP_DIR/main.py" ]; then
