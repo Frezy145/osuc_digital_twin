@@ -87,7 +87,23 @@ def SendData():
 
     data = read_csv_and_compute_mean()
 
-    requests.post(url, headers=headers, data=json.dumps(data))
+    if data == None:
+        log_warning("Aucune donnée à envoyer.")
+        return
+
+    try:
+
+        response = requests.post(url, headers=headers, data=json.dumps(data))
+
+        if response.status_code == 200:
+            log_info("Donnees envoyees avec succes.")
+        else:
+            log_error(f"Erreur lors de l'envoi des donnees des sondes: {response.status_code} - {response.text}")
+            return
+
+    except Exception as e:
+        log_error(f"Exception lors de l'envoi des donnees des sondes: {e}")
+        return
         
 
 
@@ -100,7 +116,7 @@ def read_sensors():
     try:
         client = ModbusSerialClient(port=port, baudrate=baudrate, timeout=timeout)
         if not client.connect():
-            log_warning(f"Impossible de se connecter au port {port}. Vérifie le branchement.")
+            log_warning(f"Impossible de se connecter au port {port}. Verifie le branchement.")
             return
             
     except Exception as e:
