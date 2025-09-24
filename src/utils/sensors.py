@@ -96,6 +96,7 @@ def SendData():
         response = requests.post(url, headers=headers, data=json.dumps(data))
 
         if response.status_code == 200:
+<<<<<<< HEAD
             log_info("Donnees envoyees avec succes.")
         else:
             log_error(f"Erreur lors de l'envoi des donnees des sondes: {response.status_code} - {response.text}")
@@ -103,6 +104,15 @@ def SendData():
 
     except Exception as e:
         log_error(f"Exception lors de l'envoi des donnees des sondes: {e}")
+=======
+            log_info("Données envoyées avec succès.")
+        else:
+            log_error(f"Erreur lors de l'envoi des données: {response.status_code} - {response.text}")
+            return
+
+    except Exception as e:
+        log_error(f"Exception lors de l'envoi des données: {e}")
+>>>>>>> 9a6aa26072f5fcfe6824ef7da869e07148ea02ce
         return
         
 
