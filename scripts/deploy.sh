@@ -104,6 +104,9 @@ EOF
 # Recharger systemd
 echo "Activation des timers..."
 sudo systemctl daemon-reload
+sudo systemctl restart osuc_6min.timer
+sudo systemctl restart osuc_1h.timer
+sudo systemctl restart osuc_1d.timer
 sudo systemctl enable --now osuc_6min.timer
 sudo systemctl enable --now osuc_1h.timer
 sudo systemctl enable --now osuc_1d.timer

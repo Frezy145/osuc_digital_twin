@@ -87,7 +87,23 @@ def SendData():
 
     data = read_csv_and_compute_mean()
 
-    requests.post(url, headers=headers, data=json.dumps(data))
+    if data == None:
+        log_warning("Aucune donnée à envoyer.")
+        return
+
+    try:
+
+        response = requests.post(url, headers=headers, data=json.dumps(data))
+
+        if response.status_code == 200:
+            log_info("Données envoyées avec succès.")
+        else:
+            log_error(f"Erreur lors de l'envoi des données: {response.status_code} - {response.text}")
+            return
+
+    except Exception as e:
+        log_error(f"Exception lors de l'envoi des données: {e}")
+        return
         
 
 
