@@ -54,13 +54,13 @@ def read_csv_and_compute_mean():
     try:
         df = pd.read_csv(filename, parse_dates=["Timestamp"])
         if df.empty:
-            log_warning("Le fichier CSV est vide.")
+            log_warning(f"--SENSORS-- Le fichier CSV est vide.")
             return None
         mean_values = df.mean(numeric_only=True).to_dict()
         init_csv(reinitialize=True)
         return mean_values
     except FileNotFoundError:
-        log_error(f"Le fichier {filename} n'existe pas.")
+        log_error(f"--SENSORS-- Le fichier {filename} n'existe pas.")
         return None
 
 
@@ -68,7 +68,7 @@ def read_csv_and_compute_mean():
 def read_sensor(client, slave_id, label=""):
     response = client.read_holding_registers(address=0, count=8, device_id=slave_id)
     if response.isError():
-        log_error(f"Erreur de lecture Modbus (sonde {label}): {response}")
+        log_error(f"--SENSORS-- Erreur de lecture Modbus (sonde {label}): {response}")
         return None
     else:
         humidity = response.registers[0] / 10.0
@@ -76,7 +76,7 @@ def read_sensor(client, slave_id, label=""):
         conductivity = response.registers[2] /10.0
         ph = response.registers[3] / 10.0
 
-        return humidity,temperature,conductivity,ph
+        return humidity, temperature, conductivity, ph
         
         
         
@@ -88,7 +88,7 @@ def SendData():
     data = read_csv_and_compute_mean()
 
     if data == None:
-        log_warning("Aucune donnee a envoyer.")
+        log_warning("--SENSORS-- Aucune donnee a envoyer.")
         return
 
     try:
@@ -96,13 +96,13 @@ def SendData():
         response = requests.post(url, headers=headers, data=json.dumps(data))
 
         if response.status_code == 200:
-            log_info("Donnees envoyees avec succes.")
+            log_info("--SENSORS-- Donnees envoyees avec succes.")
         else:
-            log_error(f"Erreur lors de l'envoi des donnees des sondes: {response.status_code} - {response.text}")
+            log_error(f"--SENSORS-- {response.status_code} - {response.text}")
             return
 
     except Exception as e:
-        log_error(f"Exception lors de l'envoi des donnees des sondes: {e}")
+        log_error(f"--SENSORS-- {e}")
         return
         
 
@@ -116,11 +116,11 @@ def read_sensors():
     try:
         client = ModbusSerialClient(port=port, baudrate=baudrate, timeout=timeout)
         if not client.connect():
-            log_warning(f"Impossible de se connecter au port {port}. Verifie le branchement.")
+            log_warning(f"--SENSORS-- Impossible de se connecter au port {port}. Verifie le branchement.")
             return
             
     except Exception as e:
-        log_error(f"Exception lors de la connexion Modbus: {e}")
+        log_error(f"--SENSORS-- {e}")
         return
        
     attempt = 0
@@ -138,6 +138,6 @@ def read_sensors():
 
         except Exception as e:
             attempt += 1
-            log_error(f"Exception lors de la lecture des sondes: {e}")
-            log_warning(f"Erreur lors de la lecture des sondes. Nouvelle tentative dans 10 secondes... (tentative {attempt}/3)")
+            log_error(f"--SENSORS-- {e}")
+            log_warning(f"--SENSORS-- Erreur lors de la lecture des sondes. Nouvelle tentative dans 10 secondes... (tentative {attempt}/3)")
             time.sleep(10)

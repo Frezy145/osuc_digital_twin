@@ -87,23 +87,23 @@ def get_meteo_locale():
             with open(filename, mode="a", newline="", encoding="utf-8") as f:
                 writer = csv.DictWriter(f, fieldnames=colonnes_a_garder)
                 writer.writerow(obs_filtre)
-            log_info(f"Données météo locale ajoutées dans {filename}")
+            log_info(f"--LOCAL_METEO-- Donnees meteo locale ajoutees dans {filename}")
         else:
-            log_warning("Aucune observation disponible.")
+            log_warning("--LOCAL_METEO-- Aucune observation disponible.")
     else:
-        log_error(f"Erreur API : {resp.status_code} - {resp.text}")
+        log_error(f"--LOCAL_METEO-- {resp.status_code} - {resp.text}")
 
 def read_csv_and_compute_mean():
     try:
         df = pd.read_csv(filename)
         if df.empty:
-            log_warning("Le fichier CSV est vide.")
+            log_warning("--LOCAL_METEO-- Le fichier CSV de LOCAL METEO est vide.")
             return None
         mean_values = df.mean(numeric_only=True).to_dict()
         init_csv(reinitialize=True)
         return mean_values
     except Exception as e:
-        log_error(f"Erreur lecture CSV ou calcul moyenne : {e}")
+        log_error(f"--LOCAL_METEO-- {e}")
         return None
 
 def send_meteo_locale():
@@ -118,7 +118,7 @@ def send_meteo_locale():
 
     obs_filtre = read_csv_and_compute_mean()
     if obs_filtre is None:
-        log_warning("Aucune donnée à envoyer à ThingsBoard.")
+        log_warning("--LOCAL_METEO-- Aucune donnee a envoyer a ThingsBoard.")
         return
 
     try:
@@ -128,11 +128,13 @@ def send_meteo_locale():
             data=json.dumps(obs_filtre)
         )
         if tb_resp.status_code == 200:
-            log_info("Données envoyées à ThingsBoard avec succès")
+            log_info("--LOCAL_METEO-- Donnees envoyees a ThingsBoard avec succes")
         else:
-            log_warning(f"Erreur ThingsBoard {tb_resp.status_code}: {tb_resp.text}")
+            log_warning("--LOCAL_METEO-- Error in sending data to ThingsBoard")
+            log_error(f"--LOCAL_METEO-- {tb_resp.status_code}: {tb_resp.text}")
     except Exception as e:
-        log_error(f"Erreur envoi ThingsBoard: {e}")
+        log_warning("--LOCAL_METEO-- Error in sending data to ThingsBoard")
+        log_error(f"--LOCAL_METEO-- {e}")
 
 
     
