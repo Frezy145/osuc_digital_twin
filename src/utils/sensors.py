@@ -88,7 +88,7 @@ def SendData():
     data = read_csv_and_compute_mean()
 
     if data == None:
-        log_warning("Aucune donnée à envoyer.")
+        log_warning("Aucune donnee a envoyer.")
         return
 
     try:
