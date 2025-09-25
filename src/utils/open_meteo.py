@@ -14,6 +14,7 @@ import requests
 import os
 import sys
 from pathlib import Path
+import time
 
 from src.utils.log import log_error, log_warning
 
@@ -105,33 +106,34 @@ def envoi_donnees_openmeteo_thingsboard():
 
     df = pd.read_csv(output_csv)
 
-    # get data of the current hour
-    current_hour = pd.Timestamp.now(tz="UTC").floor("H")
     df['date'] = pd.to_datetime(df['date'], utc=True)
-    row = df[df['date'] == current_hour] 
     
     try:
-        # Convertir la date ISO en timestamp (ms)
-        ts = int(row["date"].iloc[0].timestamp() * 1000)
+    
+        for _, row in df.iterrows():
+            # Convertir la date ISO en timestamp (ms)
+            ts = int(row["date"].timestamp() * 1000)
 
-        # Préparer les valeurs
-        values = {}
-        for key in [
-            "temperature_om", "humidity_om", "pressure_om", "wind_speed_om", 
-            "wind_direction_om", "precipitation_om",
-            "soil_temperature_6cm_om", "soil_temperature_18cm_om", "soil_temperature_54cm_om"
-        ]:
-            val = row.get(key, "")
-            if val and val.strip():  # non vide
-                values[key] = float(val)
+            # Préparer les valeurs
+            values = {}
+            for key in [
+                "temperature_om", "humidity_om", "pressure_om", "wind_speed_om", 
+                "wind_direction_om", "precipitation_om",
+                "soil_temperature_6cm_om", "soil_temperature_18cm_om", "soil_temperature_54cm_om"
+            ]:
+                val = row.get(key, "")
+                if val and val.strip():  # non vide
+                    values[key] = float(val)
 
-        payload = {"ts": ts, "values": values}
+            payload = {"ts": ts, "values": values}
 
-        # Envoi HTTP
-        r = requests.post(url, json=payload)
-        if r.status_code != 200:
-            log_warning("--OPEN_METEO-- Error in sending data to ThingsBoard")
-            log_error(f"--OPEN_METEO-- {r.status_code} - {r.text}")
+            # Envoi HTTP
+            r = requests.post(url, json=payload)
+            if r.status_code != 200:
+                log_warning("--OPEN_METEO-- Error in sending data to ThingsBoard")
+                log_error(f"--OPEN_METEO-- {r.status_code} - {r.text}")
+            
+            time.sleep(1)  # Pour éviter de surcharger le serveur
 
     except Exception as e:
         log_warning("--OPEN_METEO-- Error in sending data to ThingsBoard")

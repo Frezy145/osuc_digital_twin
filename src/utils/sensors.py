@@ -14,10 +14,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.append(str(BASE_DIR))
 
-from utils.log import log_error, log_info, log_warning
+from src.utils.log import log_error, log_info, log_warning
 
 # init cv file to store data
-filename = f"{BASE_DIR}/db/données_sondes.csv"
+filename = f"{BASE_DIR}/db/sensors_data.csv"
 
 # Création du fichier CSV et écriture de l'en-tête si le fichier n'existe pas
 def init_csv(reinitialize=False):
@@ -54,7 +54,7 @@ def read_csv_and_compute_mean():
     try:
         df = pd.read_csv(filename, parse_dates=["Timestamp"])
         if df.empty:
-            log_warning(f"--SENSORS-- Le fichier CSV est vide.")
+            log_warning(f"--SENSORS-- Le fichier {filename} CSV est vide.")
             return None
         mean_values = df.mean(numeric_only=True).to_dict()
         init_csv(reinitialize=True)
@@ -131,6 +131,14 @@ def read_sensors():
             H2,T2,C2,pH2=read_sensor(client, 0x02, "2")
             H3,T3,C3,pH3=read_sensor(client, 0x03, "3")
             H4,T4,C4,pH4=read_sensor(client, 0x04, "4")
+
+            log_info(
+                f"--SENSORS-- Sensors read successfully: \n"
+                f"  Sonde 1 - Temp: {T1}°C, Hum: {H1}%, Cond: {C1}mS/cm, pH: {pH1}\n"
+                f"  Sonde 2 - Temp: {T2}°C, Hum: {H2}%, Cond: {C2}mS/cm, pH: {pH2}\n"
+                f"  Sonde 3 - Temp: {T3}°C, Hum: {H3}%, Cond: {C3}mS/cm, pH: {pH3}\n"
+                f"  Sonde 4 - Temp: {T4}°C, Hum: {H4}%, Cond: {C4}mS/cm, pH: {pH4}\n"
+            )
 
             fill_csv(T1, H1, C1, pH1, T2, H2, C2, pH2, T3, H3, C3, pH3, T4, H4, C4, pH4)
 

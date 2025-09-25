@@ -14,7 +14,7 @@ import pandas as pd
 import json
 from pathlib import Path
 
-from utils.log import log_error, log_info, log_warning
+from src.utils.log import log_error, log_info, log_warning
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 if str(BASE_DIR) not in sys.path:
@@ -33,7 +33,7 @@ url = (
     f"https://api.weather.com/v2/pws/observations/current"
     f"?stationId={STATION_ID}&format=json&units=m&apiKey={API_KEY}")
 
-filename = f"{BASE_DIR}/db/données_station_IORLAN50.csv"
+filename = f"{BASE_DIR}/db/local_meteo_data.csv"
 
 # Colonnes à conserver
 colonnes_a_garder = [

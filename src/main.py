@@ -6,13 +6,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.append(str(BASE_DIR))
 
-from utils.log import log_error, log_warning
-from utils.open_meteo import get_open_meteo
-from utils.open_meteo import envoi_donnees_openmeteo_thingsboard as send_openmeteo_data
-from utils.local_meteo import get_meteo_locale
-from utils.local_meteo import send_meteo_locale as send_meteo
-from utils.sensors import read_sensors
-from utils.sensors import SendData as send_sensors_data
+from src.utils.log import log_error, log_warning
+from src.utils.open_meteo import get_open_meteo
+from src.utils.open_meteo import envoi_donnees_openmeteo_thingsboard as send_openmeteo_data
+from src.utils.local_meteo import get_meteo_locale
+from src.utils.local_meteo import send_meteo_locale as send_meteo
+from src.utils.sensors import read_sensors
+from src.utils.sensors import SendData as send_sensors_data
 
 
 if __name__ == "__main__":
