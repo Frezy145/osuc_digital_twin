@@ -144,12 +144,18 @@ def test_get_meteo_locale_and_send(setup_and_teardown):
 
 def test_read_sensor_mocked(mocker):
     class MockResponse:
-        def __init__(self, registers, error=False):
+        def __init__(self, registers, error=False, error_msg="Modbus communication error"):
             self.registers = registers
             self._error = error
+            self.error_msg = error_msg
         
         def isError(self):
             return self._error
+        
+        def __str__(self):
+            if self._error:
+                return self.error_msg
+            return f"MockResponse(registers={self.registers})"
 
     # Mock client
     mock_client = mocker.Mock()
@@ -172,7 +178,13 @@ def test_send_data_no_exception(mocker):
         "T_sonde3": 19.5, "H_sonde3": 50, "c_sonde3": 1.1, "pH_sonde3": 6.9,
         "T_sonde4": 22.0, "H_sonde4": 65, "c_sonde4": 1.4, "pH_sonde4": 7.2
     })
-    mock_send = mocker.patch('requests.post', autospec=True)
+    
+    # Create a proper mock response object
+    mock_response = mocker.Mock()
+    mock_response.status_code = 200
+    mock_response.text = "Success"
+    
+    mock_send = mocker.patch('requests.post', return_value=mock_response)
 
     try:
         SendData()
@@ -191,7 +203,30 @@ def test_send_data_no_data(mocker):
     except Exception as e:
         pytest.fail(f"SendData() raised an exception: {e}")
 
-    assert not mock_send.called  # Should not attempt to send data if none is available 
+    assert not mock_send.called  # Should not attempt to send data if none is available
+
+def test_send_data_error_handling(mocker):
+    mocker.patch('pymodbus.client.ModbusSerialClient', autospec=True)
+    mocker.patch('src.utils.sensors.read_csv_and_compute_mean', return_value={
+        "T_sonde1": 20.5, "H_sonde1": 55, "c_sonde1": 1.2, "pH_sonde1": 7.0,
+        "T_sonde2": 21.0, "H_sonde2": 60, "c_sonde2": 1.3, "pH_sonde2": 7.1,
+        "T_sonde3": 19.5, "H_sonde3": 50, "c_sonde3": 1.1, "pH_sonde3": 6.9,
+        "T_sonde4": 22.0, "H_sonde4": 65, "c_sonde4": 1.4, "pH_sonde4": 7.2
+    })
+    
+    # Create a mock response with error status
+    mock_response = mocker.Mock()
+    mock_response.status_code = 500
+    mock_response.text = "Internal Server Error"
+    
+    mock_send = mocker.patch('requests.post', return_value=mock_response)
+
+    try:
+        SendData()
+    except Exception as e:
+        pytest.fail(f"SendData() raised an exception: {e}")
+
+    assert mock_send.called 
     
 # test email function
 def test_email_no_exception(mocker):

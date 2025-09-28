@@ -9,12 +9,12 @@ import csv
 import sys
 import os
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
+import time
 import pandas as pd  
 import json
 from pathlib import Path
 
-from src.utils.log import log_error, log_info, log_warning
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 if str(BASE_DIR) not in sys.path:
@@ -22,6 +22,9 @@ if str(BASE_DIR) not in sys.path:
 
 if not os.path.exists(f"{BASE_DIR}/db"):
     os.makedirs(f"{BASE_DIR}/db")
+
+from src.utils.log import log_error, log_info, log_warning
+from src.utils.data import save_hourly_data
 
 API_KEY = "aea516e0e7de4ce6a516e0e7de3ce666"
 STATION_ID = "IORLAN50"
@@ -68,9 +71,6 @@ def get_meteo_locale():
         if "observations" in data and len(data["observations"]) > 0:
             obs = data["observations"][0]
 
-            # Ajoute un champ de date/heure locale
-            obs["collected_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
             # Extraire la partie "metric" et la fusionner avec obs
             if "metric" in obs:
                 metrics = obs.pop("metric")  # enlève "metric"
@@ -94,16 +94,29 @@ def get_meteo_locale():
         log_error(f"--LOCAL_METEO-- {resp.status_code} - {resp.text}")
 
 def read_csv_and_compute_mean():
+
+    print (f"Reading local meteo data from {filename}...")
     try:
         df = pd.read_csv(filename)
         if df.empty:
             log_warning("--LOCAL_METEO-- Le fichier CSV de LOCAL METEO est vide.")
             return None
-        mean_values = df.mean(numeric_only=True).to_dict()
+        
+        # convert "epoch" to hourly timestamp
+        df['epoch'] = pd.to_datetime(df['epoch'], unit='s', utc=True).dt.floor('h')
+        
+        df = df.resample('h', on='epoch').mean().reset_index()
+        df['epoch'] = df['epoch'].astype("int64") // 10**6  # back to epoch in ms
+
+        mean_values = df.to_dict('records')
+
         init_csv(reinitialize=True)
+
         return mean_values
+    
     except Exception as e:
         log_error(f"--LOCAL_METEO-- {e}")
+        print(f"--LOCAL_METEO-- {e}")
         return None
 
 def send_meteo_locale():
@@ -121,20 +134,37 @@ def send_meteo_locale():
         log_warning("--LOCAL_METEO-- Aucune donnee a envoyer a ThingsBoard.")
         return
 
-    try:
-        tb_resp = requests.post(
-            THINGSBOARD_URL,
-            headers={"Content-Type": "application/json"},
-            data=json.dumps(obs_filtre)
-        )
-        if tb_resp.status_code == 200:
-            log_info("--LOCAL_METEO-- Donnees envoyees a ThingsBoard avec succes")
-        else:
+    for obs in obs_filtre:
+        ts = int(obs.pop("epoch", datetime.now(tz=timezone.utc).replace(minute=0, second=0, microsecond=0).timestamp() * 1000))
+        thingboard_obj = {
+            "ts": ts,
+            "values": obs
+        }
+
+        save_hourly_data(obs, time=ts/1000)  # save to main CSV as well
+
+        try:
+            tb_resp = requests.post(
+                THINGSBOARD_URL,
+                headers={"Content-Type": "application/json"},
+                data=json.dumps(thingboard_obj)
+            )
+            if tb_resp.status_code == 200:
+                log_info("--LOCAL_METEO-- Donnees envoyees a ThingsBoard avec succes")
+            else:
+                log_warning("--LOCAL_METEO-- Error in sending data to ThingsBoard")
+                log_error(f"--LOCAL_METEO-- {tb_resp.status_code}: {tb_resp.text}")
+        except Exception as e:
             log_warning("--LOCAL_METEO-- Error in sending data to ThingsBoard")
-            log_error(f"--LOCAL_METEO-- {tb_resp.status_code}: {tb_resp.text}")
-    except Exception as e:
-        log_warning("--LOCAL_METEO-- Error in sending data to ThingsBoard")
-        log_error(f"--LOCAL_METEO-- {e}")
+            log_error(f"--LOCAL_METEO-- {e}")
 
+        # Pause pour éviter de saturer ThingsBoard
+        time.sleep(1)
 
+# test get_meteo_locale()
+
+if __name__ == "__main__":
+
+    get_meteo_locale()
+    send_meteo_locale()
     

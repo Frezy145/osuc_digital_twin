@@ -9,14 +9,14 @@ import pandas as pd
 import openmeteo_requests
 import requests_cache
 from retry_requests import retry
-
+import csv
+from datetime import datetime
 import requests
 import os
 import sys
 from pathlib import Path
 import time
 
-from src.utils.log import log_error, log_warning
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 if str(BASE_DIR) not in sys.path:
@@ -24,6 +24,9 @@ if str(BASE_DIR) not in sys.path:
 
 if not os.path.exists(f"{BASE_DIR}/db"):
     os.makedirs(f"{BASE_DIR}/db")
+
+from src.utils.log import log_error, log_warning
+from src.utils.data import save_dataframe
 
 output_csv = f"{BASE_DIR}/db/OpenMeteo_forecast.csv"
 
@@ -45,7 +48,7 @@ def get_open_meteo():
 
     lat=47.833499
     lon=1.943945
-    days_forecast=10
+    days_forecast=1
 
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
@@ -64,12 +67,17 @@ def get_open_meteo():
 
     # Données horaires
     hourly = response.Hourly()
+
     dates = pd.date_range(
         start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
         end=pd.to_datetime(hourly.TimeEnd(), unit="s", utc=True),
         freq=pd.Timedelta(seconds=hourly.Interval()),
         inclusive="left"
     )
+
+
+    # reformat dates to ISO 8601 without "+00:00"
+    dates = dates.strftime("%Y-%m-%d %H:%M:%S")
 
     df_om = pd.DataFrame({
         "date": dates,
@@ -87,6 +95,7 @@ def get_open_meteo():
     # Sauvegarde dans un CSV
     df_om.to_csv(output_csv, index=False)
 
+    save_dataframe(df_om)
 
 
 def envoi_donnees_openmeteo_thingsboard():
@@ -103,39 +112,38 @@ def envoi_donnees_openmeteo_thingsboard():
     access_token="jaIwPnJ4jzsjS4v6uXvz"
     
     url = f"{tb_url}/{access_token}/telemetry"
+    csv_file = output_csv
 
-    df = pd.read_csv(output_csv)
+    with open(csv_file, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            try:
+                # Convertir la date ISO en timestamp (ms)
+                ts = int(datetime.fromisoformat(row["date"].replace("Z", "+00:00")).timestamp() * 1000)
 
-    df['date'] = pd.to_datetime(df['date'], utc=True)
-    
-    try:
-    
-        for _, row in df.iterrows():
-            # Convertir la date ISO en timestamp (ms)
-            ts = int(row["date"].timestamp() * 1000)
+                # Préparer les valeurs
+                values = {}
+                for key in [
+                    "temperature_om", "humidity_om", "pressure_om", "wind_speed_om", 
+                    "wind_direction_om", "precipitation_om",
+                    "soil_temperature_6cm_om", "soil_temperature_18cm_om", "soil_temperature_54cm_om"
+                ]:
+                    val = row.get(key, "")
+                    if val and val.strip():  # non vide
+                        values[key] = float(val)
 
-            # Préparer les valeurs
-            values = {}
-            for key in [
-                "temperature_om", "humidity_om", "pressure_om", "wind_speed_om", 
-                "wind_direction_om", "precipitation_om",
-                "soil_temperature_6cm_om", "soil_temperature_18cm_om", "soil_temperature_54cm_om"
-            ]:
-                val = row.get(key, "")
-                if val and val.strip():  # non vide
-                    values[key] = float(val)
+                payload = {"ts": ts, "values": values}
 
-            payload = {"ts": ts, "values": values}
+                # Envoi HTTP
+                r = requests.post(url, json=payload)
+                if r.status_code != 200:
+                    log_warning("--OPEN_METEO-- Error in sending data to ThingsBoard")
+                    log_error(f"--OPEN_METEO-- {r.status_code} - {r.text}")
 
-            # Envoi HTTP
-            r = requests.post(url, json=payload)
-            if r.status_code != 200:
-                log_warning("--OPEN_METEO-- Error in sending data to ThingsBoard")
-                log_error(f"--OPEN_METEO-- {r.status_code} - {r.text}")
-            
-            time.sleep(1)  # Pour éviter de surcharger le serveur
+                # Pause pour éviter de saturer ThingsBoard
+                time.sleep(1)
 
-    except Exception as e:
-        log_warning("--OPEN_METEO-- Error in sending data to ThingsBoard")
-        log_error(f"--OPEN_METEO-- {e}")
-
+            except Exception as e:
+                log_warning("--OPEN_METEO-- Error in sending data to ThingsBoard. Check erros.log")
+                log_error(f"--OPEN_METEO-- {e}")
+                
