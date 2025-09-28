@@ -61,6 +61,12 @@ def read_csv_and_compute_mean():
         df = df.resample('h', on='date').mean().reset_index()
         # back to timestamp in ms
         df['date'] = df['date'].astype("int64") // 10**6
+
+        # set any other value to round to 2 decimal except date
+        for col in df.columns:
+            if col != "date":
+                df[col] = df[col].round(2)
+
         mean_values = df.to_dict(orient="records")
         init_csv(reinitialize=True)
         return mean_values

@@ -107,6 +107,13 @@ def read_csv_and_compute_mean():
         df = df.resample('h', on='epoch').mean().reset_index()
         df['epoch'] = df['epoch'].astype("int64") // 10**6  # back to epoch in ms
 
+        # round all values to 2 decimal except epoch
+        for col in df.columns:
+            if col != "epoch":
+                df[col] = df[col].round(2)
+
+         # Convertir le DataFrame en une liste de dictionnaires
+
         mean_values = df.to_dict('records')
 
         init_csv(reinitialize=True)
