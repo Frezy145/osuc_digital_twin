@@ -13,7 +13,7 @@ from src.utils.local_meteo import get_meteo_locale
 from src.utils.local_meteo import send_meteo_locale as send_meteo
 from src.utils.sensors import read_sensors
 from src.utils.sensors import SendData as send_sensors_data
-
+from src.utils.mail import send_data_email_to_many
 
 if __name__ == "__main__":
 
@@ -65,17 +65,6 @@ if __name__ == "__main__":
                 log_warning(f"--MAIN-- Erreur recuperation meteo locale (tentative {local_meteo_attempts})")
                 log_error(f"--MAIN-- Erreur recuperation meteo locale: {e}")
                 time.sleep(5)  # Attendre avant de réessayer
-
-        openmeteo_attempts = 0
-        while openmeteo_attempts < 3:
-            try:
-                send_openmeteo_data()
-                break  # Sortir de la boucle si réussi
-            except Exception as e:
-                openmeteo_attempts += 1
-                log_warning(f"--MAIN-- Erreur envoi donnees meteo (tentative {openmeteo_attempts})")
-                log_error(f"--MAIN-- Erreur envoi donnees meteo: {e}")
-                time.sleep(5)  # Attendre avant de réessayer
         
     elif task == "1d":
         day_attempts = 0
@@ -87,6 +76,29 @@ if __name__ == "__main__":
                 day_attempts += 1
                 log_warning(f"--MAIN-- Erreur recuperation previsions Open-Meteo (tentative {day_attempts})")
                 log_error(f"--MAIN-- Erreur recuperation previsions Open-Meteo: {e}")
+                time.sleep(5)  # Attendre avant de réessayer
+
+        openmeteo_attempts = 0
+        while openmeteo_attempts < 3:
+            try:
+                send_openmeteo_data()
+                break  # Sortir de la boucle si réussi
+            except Exception as e:
+                openmeteo_attempts += 1
+                log_warning(f"--MAIN-- Erreur envoi donnees meteo (tentative {openmeteo_attempts})")
+                log_error(f"--MAIN-- Erreur envoi donnees meteo: {e}")
+                time.sleep(5)  # Attendre avant de réessayer
+    
+    elif task == "1w":
+        email_attempts = 0
+        while email_attempts < 3:
+            try:
+                send_data_email_to_many()
+                break  # Sortir de la boucle si réussi
+            except Exception as e:
+                email_attempts += 1
+                log_warning(f"--MAIN-- Erreur envoi email (tentative {email_attempts})")
+                log_error(f"--MAIN-- Erreur envoi email: {e}")
                 time.sleep(5)  # Attendre avant de réessayer
 
     else:

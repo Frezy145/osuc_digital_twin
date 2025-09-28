@@ -37,8 +37,8 @@ cat <<EOF | sudo tee /etc/systemd/system/osuc_6min.timer > /dev/null
 Description=Timer pour osuc_6min.service
 
 [Timer]
-OnBootSec=1min
-OnUnitActiveSec=6min
+OnCalendar=*:0/6
+Persistent=true
 Unit=osuc_6min.service
 
 [Install]
@@ -65,8 +65,8 @@ cat <<EOF | sudo tee /etc/systemd/system/osuc_1h.timer > /dev/null
 Description=Timer pour osuc_1h.service
 
 [Timer]
-OnBootSec=2min
-OnUnitActiveSec=1h
+OnCalendar=*:56
+Persistent=true
 Unit=osuc_1h.service
 
 [Install]
@@ -93,9 +93,36 @@ cat <<EOF | sudo tee /etc/systemd/system/osuc_1d.timer > /dev/null
 Description=Timer pour osuc_1d.service
 
 [Timer]
-OnBootSec=5min
-OnUnitActiveSec=1d
+OnCalendar=*-*-* 00:03:00
+Persistent=true
 Unit=osuc_1d.service
+
+[Install]
+WantedBy=timers.target
+EOF
+
+# --- Weekly service ---
+cat <<EOF | sudo tee /etc/systemd/system/osuc_weekly.service > /dev/null
+[Unit]
+Description=Mail hebdomadaire avec les données archivees
+After=network.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=$APP_DIR
+ExecStart=$PYTHON_BIN $APP_DIR/main.py 1w
+
+[Install]
+WantedBy=multi-user.target
+EOF
+cat <<EOF | sudo tee /etc/systemd/system/osuc_weekly.timer > /dev/null
+[Unit]
+Description=Timer pour osuc_weekly.service
+
+[Timer]
+OnCalendar=Mon *-*-* 00:00:00
+Persistent=true
+Unit=osuc_weekly.service
 
 [Install]
 WantedBy=timers.target
@@ -107,8 +134,10 @@ sudo systemctl daemon-reload
 sudo systemctl restart osuc_6min.timer
 sudo systemctl restart osuc_1h.timer
 sudo systemctl restart osuc_1d.timer
+sudo systemctl restart osuc_weekly.timer
 sudo systemctl enable --now osuc_6min.timer
 sudo systemctl enable --now osuc_1h.timer
 sudo systemctl enable --now osuc_1d.timer
+sudo systemctl enable --now osuc_weekly.timer
 
 echo "✅ Tous les services et timers ont été installés et activés."
