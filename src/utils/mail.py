@@ -1,6 +1,6 @@
 # This module handles sending emails using SMTP
 
-from datetime import datetime
+from datetime import datetime,timezone
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -130,7 +130,7 @@ def email(subject, body, to=EMAIL_HOST_USER, attachments=None, html=False):
             if not os.path.isfile(file):
                 log_error(f"--MAIL-- Attachment file {file} not found.")
                 continue
-            date = datetime.now().strftime("%Y_%m_%d")
+            date = datetime.now(tz=timezone.utc).strftime("%Y_%m_%d")
             filename = f"{os.path.basename(file)[:-4]}_{date}.csv"
             with open(file, "rb") as f:
                 part = MIMEBase("application", "octet-stream")

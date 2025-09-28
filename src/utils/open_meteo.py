@@ -147,3 +147,6 @@ def envoi_donnees_openmeteo_thingsboard():
                 log_warning("--OPEN_METEO-- Error in sending data to ThingsBoard. Check erros.log")
                 log_error(f"--OPEN_METEO-- {e}")
                 
+if __name__ == "__main__":
+
+    get_open_meteo()

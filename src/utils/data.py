@@ -50,7 +50,7 @@ def init_csv(return_df=True, reinitialize=False):
 def archive(keep=3):
     try:
         if os.path.isfile(output_csv):
-            date_str = datetime.now().strftime("%Y_%m_%d")
+            date_str = datetime.now(tz=timezone.utc).strftime("%Y_%m_%d")
             archive_file = f"{archive_dir}/data_{date_str}.csv"
             shutil.copy2(output_csv, archive_file)
             log_info(f"--DATA-- Archived data to {archive_file}")
@@ -101,12 +101,14 @@ def save_hourly_data(data_dict, time=None, df=None, save=True):
     df = old_df.copy()
 
     if time is None:
-        time = datetime.now().replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+        time = datetime.now(tz=timezone.utc).replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
     else: # Ensure time is in correct format
         if isinstance(time, (int, float)):  # If epoch time
             time = datetime.fromtimestamp(time, tz=timezone.utc).replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
         elif isinstance(time, str):  # If string format
-            time = datetime.strptime(time, "%Y-%m-%d %H:%M:%S", tz=timezone.utc).replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+            time = datetime.fromisoformat(time).replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+        elif isinstance(time, datetime):
+            time = time.astimezone(timezone.utc).replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
 
     for column, value in data_dict.items():
         df = save_cell(time, column, value, df=df, save=False)

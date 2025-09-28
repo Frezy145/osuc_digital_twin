@@ -42,7 +42,7 @@ def fill_csv(T1, H1, C1, pH1, T2, H2, C2, pH2, T3, H3, C3, pH3, T4, H4, C4, pH4)
     with open(filename, "a", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S", tz=timezone.utc),
+            datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
             T1, H1, C1, pH1,
             T2, H2, C2, pH2,
             T3, H3, C3, pH3,
@@ -103,11 +103,11 @@ def SendData():
     headers = {"Content-Type": "application/json"}
 
     data = read_csv_and_compute_mean()
+    print(f"From send_data: {data}")
 
     if data == None:
         log_warning("--SENSORS-- Aucune donnee a envoyer.")
         return
-
     for obs in data:
 
         # Prepare data for ThingsBoard
