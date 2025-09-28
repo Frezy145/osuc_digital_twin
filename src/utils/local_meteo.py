@@ -95,7 +95,6 @@ def get_meteo_locale():
 
 def read_csv_and_compute_mean():
 
-    print (f"Reading local meteo data from {filename}...")
     try:
         df = pd.read_csv(filename)
         if df.empty:
@@ -116,7 +115,6 @@ def read_csv_and_compute_mean():
     
     except Exception as e:
         log_error(f"--LOCAL_METEO-- {e}")
-        print(f"--LOCAL_METEO-- {e}")
         return None
 
 def send_meteo_locale():
@@ -160,11 +158,3 @@ def send_meteo_locale():
 
         # Pause pour éviter de saturer ThingsBoard
         time.sleep(1)
-
-# test get_meteo_locale()
-
-if __name__ == "__main__":
-
-    get_meteo_locale()
-    send_meteo_locale()
-    
