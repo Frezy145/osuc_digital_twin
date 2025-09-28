@@ -62,7 +62,7 @@ def read_csv_and_compute_mean():
         # back to timestamp in ms
         df['date'] = df['date'].astype("int64") // 10**6
         mean_values = df.to_dict(orient="records")
-        init_csv(reinitialize=True)
+        # init_csv(reinitialize=True)
         return mean_values
     except FileNotFoundError:
         log_error(f"--SENSORS-- Le fichier {filename} n'existe pas.")
@@ -103,7 +103,6 @@ def SendData():
     headers = {"Content-Type": "application/json"}
 
     data = read_csv_and_compute_mean()
-    print(f"From send_data: {data}")
 
     if data == None:
         log_warning("--SENSORS-- Aucune donnee a envoyer.")
@@ -128,10 +127,12 @@ def SendData():
             else:
                 log_warning(f"--SENSORS-- Status code {response.status_code} received from ThingsBoard.")
                 log_error(f"--SENSORS-- {response.status_code} - {response.text}")
+                print(f"--SENSORS-- {response.status_code} - {response.text}")
                 return
 
         except Exception as e:
             log_error(f"--SENSORS-- {e}")
+            print(f"--SENSORS-- {e}")
             return
         
         time.sleep(1)  # Pause pour éviter de saturer le serveur
@@ -173,3 +174,7 @@ def read_sensors():
             log_error(f"--SENSORS-- {e}")
             log_warning(f"--SENSORS-- Erreur lors de la lecture des sondes. Nouvelle tentative dans 10 secondes... (tentative {attempt}/3)")
             time.sleep(10)
+
+
+if __name__ == "__main__":
+    SendData()
