@@ -126,6 +126,7 @@ def SendData():
             if response.status_code == 200:
                 log_info("--SENSORS-- Donnees envoyees avec succes.")
             else:
+                log_warning(f"--SENSORS-- Status code {response.status_code} received from ThingsBoard.")
                 log_error(f"--SENSORS-- {response.status_code} - {response.text}")
                 return
 
@@ -161,13 +162,7 @@ def read_sensors():
             H3,T3,C3,pH3=read_sensor(client, 0x03, "3")
             H4,T4,C4,pH4=read_sensor(client, 0x04, "4")
 
-            log_info(
-                f"--SENSORS-- Sensors read successfully: \n"
-                f"  Sonde 1 - Temp: {T1}°C, Hum: {H1}%, Cond: {C1}mS/cm, pH: {pH1}\n"
-                f"  Sonde 2 - Temp: {T2}°C, Hum: {H2}%, Cond: {C2}mS/cm, pH: {pH2}\n"
-                f"  Sonde 3 - Temp: {T3}°C, Hum: {H3}%, Cond: {C3}mS/cm, pH: {pH3}\n"
-                f"  Sonde 4 - Temp: {T4}°C, Hum: {H4}%, Cond: {C4}mS/cm, pH: {pH4}\n"
-            )
+            log_info(f"--SENSORS-- Sensors read successfully")
 
             fill_csv(T1, H1, C1, pH1, T2, H2, C2, pH2, T3, H3, C3, pH3, T4, H4, C4, pH4)
 

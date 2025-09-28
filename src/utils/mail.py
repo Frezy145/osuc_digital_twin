@@ -138,9 +138,6 @@ def email(subject, body, to=EMAIL_HOST_USER, attachments=None, html=False):
                 encoders.encode_base64(part)
                 part.add_header("Content-Disposition", f"attachment; filename={filename}")
                 msg.attach(part)
-
-
-
     try:
         with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
             server.starttls() if EMAIL_USE_TLS else server.startssl()
@@ -181,15 +178,17 @@ def send_data_email_to_many(recipients=EMAIL_RECIPIENTS):
         name = str(recipient).split("@")[0].replace(".", " ").title()
         sent = send_data_email(to=recipient.strip(), recipient_name=name, archive=False, return_sent=True)
         all_sent = all_sent or sent
+    
+    log_info(f"--MAIL-- Emails sent to {len(recipients)} recipients.")
 
     if all_sent:
         archive(keep=3)
 
-def send_error_email(error_message, to=EMAIL_HOST_USER, recipient_name=None):
+def send_error_email(error_message, subject=None, to=EMAIL_HOST_USER, recipient_name=None):
     """
     Send an email notifying about an error.
     """
-    subject = "OSUC Digital Twin System Error Notification"
+    subject = subject if subject else "OSUC Digital Twin System Error Notification"
     message = f"""
         An error occurred in the OSUC Digital Twin system:
         {error_message}
@@ -197,6 +196,3 @@ def send_error_email(error_message, to=EMAIL_HOST_USER, recipient_name=None):
     """
     body = create_html_body(subject, message, recipient_name=recipient_name)
     email(subject, body, to=to, html=True)
-
-if __name__ == "__main__":
-    send_data_email_to_many()
