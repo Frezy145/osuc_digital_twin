@@ -37,7 +37,7 @@ cat <<EOF | sudo tee /etc/systemd/system/osuc_6min.timer > /dev/null
 Description=Timer pour osuc_6min.service
 
 [Timer]
-OnCalendar=*:0/6
+OnCalendar=UTC *:0/6
 Persistent=true
 Unit=osuc_6min.service
 
@@ -65,7 +65,7 @@ cat <<EOF | sudo tee /etc/systemd/system/osuc_1h.timer > /dev/null
 Description=Timer pour osuc_1h.service
 
 [Timer]
-OnCalendar=*:56
+OnCalendar=UTC *:56
 Persistent=true
 Unit=osuc_1h.service
 
@@ -93,7 +93,7 @@ cat <<EOF | sudo tee /etc/systemd/system/osuc_1d.timer > /dev/null
 Description=Timer pour osuc_1d.service
 
 [Timer]
-OnCalendar=*-*-* 00:03:00
+OnCalendar=UTC *-*-* 00:03:00
 Persistent=true
 Unit=osuc_1d.service
 
@@ -120,7 +120,7 @@ cat <<EOF | sudo tee /etc/systemd/system/osuc_weekly.timer > /dev/null
 Description=Timer pour osuc_weekly.service
 
 [Timer]
-OnCalendar=Mon *-*-* 00:00:00
+OnCalendar=UTC Mon *-*-* 00:00:00
 Persistent=true
 Unit=osuc_weekly.service
 
