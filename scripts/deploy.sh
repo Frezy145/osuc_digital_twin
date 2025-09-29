@@ -37,7 +37,7 @@ cat <<EOF | sudo tee /etc/systemd/system/osuc_6min.timer > /dev/null
 Description=Timer pour osuc_6min.service
 
 [Timer]
-OnCalendar=UTC *-*-* *:0/6:00
+OnCalendar=UTC *-*-* UTC *:0/6:00
 Persistent=true
 Unit=osuc_6min.service
 
