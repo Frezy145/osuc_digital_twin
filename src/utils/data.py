@@ -33,7 +33,7 @@ def init_csv(return_df=True, reinitialize=False):
             "wind_speed_om", "wind_direction_om", "precipitation_om",
             "soil_temperature_6cm_om", "soil_temperature_18cm_om", "soil_temperature_54cm_om",
 
-            "solarRadiation", "epoch", "winddir", "humidity", "metric_temp", "metric_windSpeed",
+            "solarRadiation", "winddir", "humidity", "metric_temp", "metric_windSpeed",
             "metric_windGust", "metric_pressure", "metric_precipRate", "metric_precipTotal",
 
             "T_sonde1", "H_sonde1", "c_sonde1", "pH_sonde1",

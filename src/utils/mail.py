@@ -175,7 +175,7 @@ def send_data_email_to_many(recipients=EMAIL_RECIPIENTS):
     """
     all_sent = False
     for recipient in recipients:
-        name = str(recipient).split("@")[0].replace(".", " ").title()
+        name = str(recipient).strip().split("@")[0].replace(".", " ").title()
         sent = send_data_email(to=recipient.strip(), recipient_name=name, archive=False, return_sent=True)
         all_sent = all_sent or sent
     
