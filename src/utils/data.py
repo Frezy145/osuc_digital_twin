@@ -60,6 +60,7 @@ def archive(keep=3):
             log_warning(f"--DATA-- No data file {output_csv} to archive.")
     except Exception as e:
         log_error(f"--DATA-- Error during archiving: {e}")
+        raise
 
 def cleanup_old_archives(keep=3):
 
@@ -72,7 +73,8 @@ def cleanup_old_archives(keep=3):
             os.remove(old_file) 
         
     except Exception as e:
-       log_error(f"--DATA-- Error during cleanup_old_archives: {e}")
+        log_error(f"--DATA-- Error during cleanup_old_archives: {e}")
+        raise
 
 def save_cell(date, column, value, df=None, save=True):
     if df is None:
@@ -100,34 +102,44 @@ def save_hourly_data(data_dict, time=None, df=None, save=True):
 
     df = old_df.copy()
 
-    if time is None:
-        time = datetime.now(tz=timezone.utc).replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
-    else: # Ensure time is in correct format
-        if isinstance(time, (int, float)):  # If epoch time
-            time = datetime.fromtimestamp(time, tz=timezone.utc).replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
-        elif isinstance(time, str):  # If string format
-            time = datetime.fromisoformat(time).replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
-        elif isinstance(time, datetime):
-            time = time.astimezone(timezone.utc).replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+    try:
 
-    for column, value in data_dict.items():
-        df = save_cell(time, column, value, df=df, save=False)
+        if time is None:
+            time = datetime.now(tz=timezone.utc).replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+        else: # Ensure time is in correct format
+            if isinstance(time, (int, float)):  # If epoch time
+                time = datetime.fromtimestamp(time, tz=timezone.utc).replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+            elif isinstance(time, str):  # If string format
+                time = datetime.fromisoformat(time).replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+            elif isinstance(time, datetime):
+                time = time.astimezone(timezone.utc).replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
 
-    # if df is updated, save it
-    if save:
-        if not df.equals(old_df):
-            df.to_csv(output_csv, index=False)
-    else:
-        return df
+        for column, value in data_dict.items():
+            df = save_cell(time, column, value, df=df, save=False)
+
+        # if df is updated, save it
+        if save:
+            if not df.equals(old_df):
+                df.to_csv(output_csv, index=False)
+        else:
+            return df
+    except Exception as e:
+        log_error(f"--DATA-- Error in save_hourly_data: {e}")
+        raise
 
 def save_dataframe(df):
     old_df = init_csv()
     new_df = old_df.copy()
 
-    for _, row in df.iterrows():
-        time = row['date']
-        data_dict = row.drop(labels=['date']).to_dict()
-        new_df = save_hourly_data(data_dict, time=time, df=new_df, save=False)
+    try:
+        for _, row in df.iterrows():
+            time = row['date']
+            data_dict = row.drop(labels=['date']).to_dict()
+            new_df = save_hourly_data(data_dict, time=time, df=new_df, save=False)
 
-    if not new_df.equals(old_df):   
-        new_df.to_csv(output_csv, index=False)
+        if not new_df.equals(old_df):
+            new_df.to_csv(output_csv, index=False)
+
+    except Exception as e:
+        log_error(f"--DATA-- Error in save_dataframe: {e}")
+        raise

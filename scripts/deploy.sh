@@ -27,6 +27,7 @@ After=network.target
 Type=oneshot
 WorkingDirectory=$APP_DIR
 ExecStart=$PYTHON_BIN $APP_DIR/main.py 6min
+TimeoutStartSec=300
 
 [Install]
 WantedBy=multi-user.target
@@ -55,6 +56,7 @@ After=network.target
 Type=oneshot
 WorkingDirectory=$APP_DIR
 ExecStart=$PYTHON_BIN $APP_DIR/main.py 1h
+TimeoutStartSec=300
 
 [Install]
 WantedBy=multi-user.target
@@ -83,6 +85,7 @@ After=network.target
 Type=oneshot
 WorkingDirectory=$APP_DIR
 ExecStart=$PYTHON_BIN $APP_DIR/main.py 1d
+TimeoutStartSec=600
 
 [Install]
 WantedBy=multi-user.target
@@ -111,6 +114,7 @@ After=network.target
 Type=oneshot
 WorkingDirectory=$APP_DIR
 ExecStart=$PYTHON_BIN $APP_DIR/main.py 1w
+TimeoutStartSec=1200
 
 [Install]
 WantedBy=multi-user.target
@@ -131,10 +135,6 @@ EOF
 # Recharger systemd
 echo "Activation des timers..."
 sudo systemctl daemon-reload
-sudo systemctl restart osuc_6min.timer
-sudo systemctl restart osuc_1h.timer
-sudo systemctl restart osuc_1d.timer
-sudo systemctl restart osuc_weekly.timer
 sudo systemctl enable --now osuc_6min.timer
 sudo systemctl enable --now osuc_1h.timer
 sudo systemctl enable --now osuc_1d.timer

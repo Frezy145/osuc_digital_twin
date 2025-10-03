@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.append(str(BASE_DIR))
 
-from src.utils.log import log_error, log_info
+from src.utils.log import log_error, log_info, log_warning
 from src.utils.data import archive
 
 load_dotenv()
@@ -27,6 +27,7 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")
 EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
 EMAIL_RECIPIENTS = os.getenv("EMAIL_RECIPIENTS", EMAIL_HOST_USER).split(",")
+SYSTEM_ADMIN_EMAIL = os.getenv("SYSTEM_ADMIN_EMAIL", EMAIL_HOST_USER)
 
 def create_html_body(title, message, recipient_name=None, data_summary=None):
     
@@ -139,11 +140,11 @@ def email(subject, body, to=EMAIL_HOST_USER, attachments=None, html=False):
                 part.add_header("Content-Disposition", f"attachment; filename={filename}")
                 msg.attach(part)
     try:
-        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
+        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30) as server:
             server.starttls() if EMAIL_USE_TLS else server.startssl()
             server.login(EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)
             server.send_message(msg)
-            log_info("--MAIL-- Email sent successfully.")
+            log_info(f"--MAIL-- Email sent successfully to {to}")
             return True
     except Exception as e:
         log_error(f"--MAIL-- {e}")
@@ -183,8 +184,11 @@ def send_data_email_to_many(recipients=EMAIL_RECIPIENTS):
 
     if all_sent:
         archive(keep=3)
+    else:
+        log_warning("--MAIL-- Some emails failed to send; data file not archived.")
+        raise Exception("Some emails failed to send; data file not archived.")
 
-def send_error_email(error_message, subject=None, to=EMAIL_HOST_USER, recipient_name=None):
+def send_error_email(error_message, subject=None, to=SYSTEM_ADMIN_EMAIL, recipient_name=None):
     """
     Send an email notifying about an error.
     """
@@ -194,5 +198,9 @@ def send_error_email(error_message, subject=None, to=EMAIL_HOST_USER, recipient_
         {error_message}
         Please investigate the issue as soon as possible.
     """
+
+    if recipient_name is None and to == SYSTEM_ADMIN_EMAIL:
+        recipient_name = "System Administrator"
+        
     body = create_html_body(subject, message, recipient_name=recipient_name)
     email(subject, body, to=to, html=True)

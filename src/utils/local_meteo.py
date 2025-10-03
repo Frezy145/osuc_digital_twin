@@ -64,7 +64,7 @@ def init_csv(reinitialize=False):
             writer.writeheader()
 
 def get_meteo_locale():
-    resp = requests.get(url)
+    resp = requests.get(url, timeout=10)
 
     if resp.status_code == 200:
         data = resp.json()
@@ -92,6 +92,7 @@ def get_meteo_locale():
             log_warning("--LOCAL_METEO-- Aucune observation disponible.")
     else:
         log_error(f"--LOCAL_METEO-- {resp.status_code} - {resp.text}")
+        raise Exception(f"Error fetching local weather data: {resp.status_code} - {resp.text}")
 
 def read_csv_and_compute_mean():
 
@@ -102,7 +103,7 @@ def read_csv_and_compute_mean():
             return None
         
         # convert "epoch" to hourly timestamp
-        df['epoch'] = pd.to_datetime(df['epoch'], unit='s', utc=True).dt.floor('h')
+        df['epoch'] = pd.to_datetime(df['epoch']+120, unit='s', utc=True).dt.floor('h')
         
         df = df.resample('h', on='epoch').mean().reset_index()
         df['epoch'] = df['epoch'].astype("int64") // 10**6  # back to epoch in ms
@@ -122,7 +123,7 @@ def read_csv_and_compute_mean():
     
     except Exception as e:
         log_error(f"--LOCAL_METEO-- {e}")
-        return None
+        raise
 
 def send_meteo_locale():
     """
@@ -152,16 +153,19 @@ def send_meteo_locale():
             tb_resp = requests.post(
                 THINGSBOARD_URL,
                 headers={"Content-Type": "application/json"},
-                data=json.dumps(thingboard_obj)
+                data=json.dumps(thingboard_obj), 
+                timeout=10
             )
             if tb_resp.status_code == 200:
                 log_info("--LOCAL_METEO-- Donnees envoyees a ThingsBoard avec succes")
             else:
                 log_warning("--LOCAL_METEO-- Error in sending data to ThingsBoard")
                 log_error(f"--LOCAL_METEO-- {tb_resp.status_code}: {tb_resp.text}")
+                raise Exception(f"ThingsBoard response: {tb_resp.status_code} - {tb_resp.text}")
         except Exception as e:
             log_warning("--LOCAL_METEO-- Error in sending data to ThingsBoard")
             log_error(f"--LOCAL_METEO-- {e}")
+            raise
 
         # Pause pour éviter de saturer ThingsBoard
         time.sleep(1)

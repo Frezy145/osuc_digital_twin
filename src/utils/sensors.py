@@ -72,7 +72,10 @@ def read_csv_and_compute_mean():
         return mean_values
     except FileNotFoundError:
         log_error(f"--SENSORS-- Le fichier {filename} n'existe pas.")
-        return None
+        raise
+    except Exception as e:
+        log_error(f"--SENSORS-- Erreur lors de la lecture ou du traitement du fichier {filename}: {e}")
+        raise
 
 
 # Fonction pour lire les données d'une sonde donnée
@@ -84,12 +87,12 @@ def read_sensor(client, slave_id, label=""):
             if hasattr(response, 'exception_code'):
                 error_msg += f" - Exception code: {response.exception_code}"
             log_error(f"--SENSORS-- {error_msg}")
-            return None
+            raise Exception(error_msg)
         else:
             # Validate that we have enough registers
             if len(response.registers) < 4:
                 log_error(f"--SENSORS-- Insufficient data from sensor {label} (slave_id={slave_id}): expected 4 registers, got {len(response.registers)}")
-                return None
+                raise Exception(f"Insufficient data from sensor {label} (slave_id={slave_id})")
                 
             humidity = response.registers[0] / 10.0
             temperature = response.registers[1] / 10.0
@@ -99,7 +102,7 @@ def read_sensor(client, slave_id, label=""):
             return humidity, temperature, conductivity, ph
     except Exception as e:
         log_error(f"--SENSORS-- Exception reading sensor {label} (slave_id={slave_id}): {str(e)}")
-        return None
+        raise
         
         
         
@@ -128,7 +131,7 @@ def SendData():
 
         try:
 
-            response = requests.post(url, headers=headers, data=json.dumps(tb_data))
+            response = requests.post(url, headers=headers, data=json.dumps(tb_data), timeout=10)
 
             if response.status_code == 200:
                 log_info("--SENSORS-- Donnees envoyees avec succes.")
@@ -137,10 +140,14 @@ def SendData():
                 log_error(f"--SENSORS-- {response.status_code} - {response.text}")
                 return
 
+        except TimeoutError:
+            log_warning("--SENSORS-- Request timed out.")
+            raise
+
         except Exception as e:
             log_error(f"--SENSORS-- {e}")
-            return
-        
+            raise
+
         time.sleep(1)  # Pause pour éviter de saturer le serveur
 
 
@@ -154,29 +161,24 @@ def read_sensors():
         client = ModbusSerialClient(port=port, baudrate=baudrate, timeout=timeout)
         if not client.connect():
             log_warning(f"--SENSORS-- Impossible de se connecter au port {port}. Verifie le branchement.")
-            return
-            
+            raise Exception(f"Connection failed on port {port}")
     except Exception as e:
         log_error(f"--SENSORS-- {e}")
-        return
-       
-    attempt = 0
-    while attempt < 3:
-        try:
+        log_warning(f"--SENSORS-- Erreur de connexion au port {port}. Verifie le branchement.")
+        raise
 
-            H1,T1,C1,pH1=read_sensor(client, 0x01, "1")
-            H2,T2,C2,pH2=read_sensor(client, 0x02, "2")
-            H3,T3,C3,pH3=read_sensor(client, 0x03, "3")
-            H4,T4,C4,pH4=read_sensor(client, 0x04, "4")
+    try:
 
-            log_info(f"--SENSORS-- Sensors read successfully")
+        H1,T1,C1,pH1=read_sensor(client, 0x01, "1")
+        H2,T2,C2,pH2=read_sensor(client, 0x02, "2")
+        H3,T3,C3,pH3=read_sensor(client, 0x03, "3")
+        H4,T4,C4,pH4=read_sensor(client, 0x04, "4")
 
-            fill_csv(T1, H1, C1, pH1, T2, H2, C2, pH2, T3, H3, C3, pH3, T4, H4, C4, pH4)
+        log_info(f"--SENSORS-- Sensors read successfully")
 
-            break
+        fill_csv(T1, H1, C1, pH1, T2, H2, C2, pH2, T3, H3, C3, pH3, T4, H4, C4, pH4)
 
-        except Exception as e:
-            attempt += 1
-            log_error(f"--SENSORS-- {e}")
-            log_warning(f"--SENSORS-- Erreur lors de la lecture des sondes. Nouvelle tentative dans 10 secondes... (tentative {attempt}/3)")
-            time.sleep(10)
+    except Exception as e:
+        log_error(f"--SENSORS-- {e}")
+        log_warning(f"--SENSORS-- Erreur lors de la lecture des sondes.")
+        raise

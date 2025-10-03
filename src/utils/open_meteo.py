@@ -135,10 +135,11 @@ def envoi_donnees_openmeteo_thingsboard():
                 payload = {"ts": ts, "values": values}
 
                 # Envoi HTTP
-                r = requests.post(url, json=payload)
+                r = requests.post(url, json=payload, timeout=10)
                 if r.status_code != 200:
                     log_warning("--OPEN_METEO-- Error in sending data to ThingsBoard")
                     log_error(f"--OPEN_METEO-- {r.status_code} - {r.text}")
+                    raise Exception(f"ThingsBoard response: {r.status_code} - {r.text}")
 
                 # Pause pour éviter de saturer ThingsBoard
                 time.sleep(1)
@@ -146,3 +147,4 @@ def envoi_donnees_openmeteo_thingsboard():
             except Exception as e:
                 log_warning("--OPEN_METEO-- Error in sending data to ThingsBoard. Check erros.log")
                 log_error(f"--OPEN_METEO-- {e}")
+                raise
