@@ -19,6 +19,7 @@ from src.utils.mail import send_error_email
 if __name__ == "__main__":
 
     task = sys.argv[1] if len(sys.argv) > 1 else None
+    param = sys.argv[2] if len(sys.argv) > 2 else None
 
     if task == "6min": 
         min_sensors_attempts = 0
@@ -99,7 +100,13 @@ if __name__ == "__main__":
         day_attempts = 0
         while day_attempts < 3:
             try:
-                get_open_meteo()
+                past_days = 0
+                if param is not None: 
+                    try: 
+                        past_days = int(param)
+                    except ValueError:
+                        past_days = 0
+                get_open_meteo(past_days=past_days)
                 break  # Sortir de la boucle si réussi
             except Exception as e:
                 day_attempts += 1

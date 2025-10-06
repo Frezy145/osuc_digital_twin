@@ -30,7 +30,7 @@ from src.utils.data import save_dataframe
 
 output_csv = f"{BASE_DIR}/db/OpenMeteo_forecast.csv"
 
-def get_open_meteo():
+def get_open_meteo(past_days:int=0, days_forecast:int=1):
     """
     Récupère les données météo d'Open-Meteo et les sauvegarde dans un CSV.
 
@@ -48,7 +48,6 @@ def get_open_meteo():
 
     lat=47.833499
     lon=1.943945
-    days_forecast=1
 
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
@@ -59,6 +58,7 @@ def get_open_meteo():
             "wind_direction_10m", "precipitation", "soil_temperature_6cm",
             "soil_temperature_18cm", "soil_temperature_54cm"
         ],
+        "past_days": past_days,
         "forecast_days": days_forecast,
     }
 
